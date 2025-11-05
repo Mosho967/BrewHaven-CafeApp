@@ -16,10 +16,10 @@ class WelcomeFragment : Fragment(R.layout.fragment_welcome) {
         btnLogin.setOnClickListener {
             parentFragmentManager.beginTransaction()
                 .setCustomAnimations(
-                    R.anim.fade_in,   // optional if you’ve added these
+                    R.anim.fade_in,
                     R.anim.fade_out
                 )
-                .replace(android.R.id.content, LoginFragment())
+                .replace(R.id.fragment_container, LoginFragment())
                 .addToBackStack(null)
                 .commit()
         }
