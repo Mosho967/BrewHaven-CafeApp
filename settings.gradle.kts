@@ -1,6 +1,6 @@
 pluginManagement {
     repositories {
-        google ()
+        google()
         mavenCentral()
         gradlePluginPortal()
     }
@@ -15,4 +15,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "BrewHaven-CafeApp"
 include(":app")
- 
+
+
+
