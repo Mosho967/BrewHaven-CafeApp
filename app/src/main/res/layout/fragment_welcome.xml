@@ -21,10 +21,10 @@
 
     <!-- Login Button -->
     <Button
-        android:id="@+id/buttonLogin"
+        android:id="@+id/button"
         android:layout_width="196dp"
         android:layout_height="66dp"
-        android:text="Login"
+        android:text="Sign in"
         android:textColor="@android:color/white"
         android:backgroundTint="#D7B7B7"
         app:layout_constraintBottom_toBottomOf="parent"
