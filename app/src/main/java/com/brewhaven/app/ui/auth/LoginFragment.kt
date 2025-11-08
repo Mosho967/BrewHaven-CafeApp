@@ -6,7 +6,7 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.fragment.app.Fragment
 import com.brewhaven.app.R
-import com.brewhaven.app.ui.store.StoreFragment
+import com.brewhaven.app.ui.store.MenuFragment
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 
@@ -36,14 +36,12 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 .addOnCompleteListener { task ->
                     btnLogin.isEnabled = true
                     if (task.isSuccessful) {
-                        // Go forward to Store. Do NOT popBackStack().
+
                         parentFragmentManager.beginTransaction()
-                            .setCustomAnimations(
-                                R.anim.fade_in, R.anim.fade_out,
-                                R.anim.fade_in, R.anim.fade_out
-                            )
-                            .replace(R.id.fragment_container, StoreFragment())
+                            .setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)
+                            .replace(R.id.fragment_container, MenuFragment())
                             .commit()
+
                     } else {
                         val msg = task.exception?.localizedMessage ?: "Login failed"
                         Snackbar.make(view, msg, Snackbar.LENGTH_LONG).show()
