@@ -1,0 +1,33 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical" android:padding="16dp"
+        android:layout_width="match_parent" android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/image" android:adjustViewBounds="true"
+            android:layout_width="match_parent" android:layout_height="200dp" />
+
+        <TextView android:id="@+id/title" android:textStyle="bold" android:textSize="22sp"
+            android:layout_width="match_parent" android:layout_height="wrap_content" />
+
+        <TextView android:id="@+id/price"
+            android:layout_width="match_parent" android:layout_height="wrap_content" />
+
+        <TextView android:id="@+id/description"
+            android:layout_width="match_parent" android:layout_height="wrap_content" />
+
+        <TextView android:id="@+id/kcal"
+            android:layout_width="match_parent" android:layout_height="wrap_content" />
+
+        <TextView android:id="@+id/allergens"
+            android:layout_width="match_parent" android:layout_height="wrap_content" />
+
+        <Button android:id="@+id/btnAddToCart" android:text="Add to Cart"
+            android:layout_width="match_parent" android:layout_height="wrap_content" />
+
+        <Button android:id="@+id/btnFavorite" android:text="Favorite"
+            android:layout_width="match_parent" android:layout_height="wrap_content" />
+    </LinearLayout>
+</ScrollView>
