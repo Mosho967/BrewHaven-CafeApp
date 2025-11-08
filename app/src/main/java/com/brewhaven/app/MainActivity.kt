@@ -1,28 +1,34 @@
 package com.brewhaven.app
 
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.brewhaven.app.ui.auth.SplashFragment
+import com.brewhaven.app.ui.store.MenuFragment
+import com.brewhaven.app.ui.favourites.FavouritesFragment
+import com.brewhaven.app.ui.cart.CartFragment
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-        if (savedInstanceState == null) {
+        val bottom = findViewById<BottomNavigationView>(R.id.bottomNav)
+        bottom.setOnItemSelectedListener { item ->
+            val frag = when (item.itemId) {
+                R.id.nav_menu -> MenuFragment()
+                R.id.nav_favourites -> FavouritesFragment()
+                R.id.nav_cart -> CartFragment()
+                else -> MenuFragment()
+            }
             supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, SplashFragment())
+                .setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)
+                .replace(R.id.fragment_container, frag)
                 .commit()
+            true
         }
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+        if (savedInstanceState == null) {
+            bottom.selectedItemId = R.id.nav_menu
         }
     }
 }
