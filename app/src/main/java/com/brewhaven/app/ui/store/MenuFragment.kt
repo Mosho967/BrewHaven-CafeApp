@@ -53,7 +53,7 @@ class MenuFragment : Fragment(R.layout.fragment_menu) {
                         adapter.updateCountAt(index, snap.count.toInt())
                     }
                     .addOnFailureListener {
-                        // leave as 0 on failure
+
                     }
             }
         }
