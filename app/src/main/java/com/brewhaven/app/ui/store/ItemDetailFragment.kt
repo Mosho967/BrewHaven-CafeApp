@@ -8,6 +8,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.brewhaven.app.R
+import com.google.android.material.appbar.MaterialToolbar
 
 class ItemDetailFragment : Fragment(R.layout.fragment_item_detail) {
 
@@ -63,7 +64,7 @@ class ItemDetailFragment : Fragment(R.layout.fragment_item_detail) {
             allergens.visibility = View.GONE
         }
 
-        // Image: try to map name to drawable (filenames like "still_water_500ml.png")
+        // Image:map name to drawable ("still_water_500ml.png" etc)
         image.setImageResource(nameToDrawable(item.name) ?: R.drawable.ic_image_placeholder)
 
         // Sold out treatment
@@ -89,7 +90,7 @@ class ItemDetailFragment : Fragment(R.layout.fragment_item_detail) {
             }
         }
 
-        // Favorite: visual toggle only for now (real persistence in step 3)
+        // Favorite: visual toggle stub for now
         var fav = false
         btnFav.setOnClickListener {
             fav = !fav
@@ -97,15 +98,21 @@ class ItemDetailFragment : Fragment(R.layout.fragment_item_detail) {
             // later: FavoritesStore.toggle(item.id)
         }
 
-        // Add to cart: stub for now, we wire to CartRepository in step 2
+        val toolbar = view.findViewById<MaterialToolbar>(R.id.toolbar)
+        toolbar.title = item.name
+        toolbar.setNavigationOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
+
+        // temporary cart stub
         btnAdd.setOnClickListener {
             Toast.makeText(requireContext(), "Added ${qty} × ${item.name}", Toast.LENGTH_SHORT).show()
-            // later: CartRepository.add(item, qty); maybe navigate to cart
+            // later: CartRepository.add(item, qty)
         }
     }
 
     /**
-     * Map a human name to a drawable you already placed in res/drawable.
+     * Map a human name to a drawable.
      * Example: "Still Water 500ml" -> R.drawable.still_water_500ml
      */
     private fun nameToDrawable(name: String): Int? {

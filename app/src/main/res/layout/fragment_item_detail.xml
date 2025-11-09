@@ -10,16 +10,16 @@
         android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:navigationIcon="@drawable/ic_arrow_back_24"
-        android:background="?attr/colorSurface"
-        app:titleTextColor="?attr/colorOnSurface"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:navigationIcon="@drawable/ic_arrow_back_24"
+        android:background="?attr/colorSurface"
+        app:titleTextColor="?attr/colorOnSurface"
         android:paddingStart="8dp"
-        android:paddingEnd="8dp"/>
+        android:paddingEnd="8dp" />
 
-    <!-- your exact original ScrollView under the bar -->
+    <!-- ScrollView under the bar -->
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -33,7 +33,6 @@
             android:layout_height="wrap_content"
             android:padding="16dp">
 
-            <!-- everything below is untouched -->
             <ImageView
                 android:id="@+id/image"
                 android:layout_width="0dp"

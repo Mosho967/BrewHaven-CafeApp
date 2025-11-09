@@ -7,6 +7,8 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.brewhaven.app.R
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.android.material.appbar.MaterialToolbar
+
 
 class StoreListFragment : Fragment(R.layout.fragment_store_list) {
 
@@ -30,6 +32,11 @@ class StoreListFragment : Fragment(R.layout.fragment_store_list) {
         val list = view.findViewById<RecyclerView>(R.id.storeList)
         val progress = view.findViewById<View>(R.id.progress)
         val errorText = view.findViewById<TextView>(R.id.errorText)
+        val toolbar = view.findViewById<MaterialToolbar>(R.id.toolbar)
+        toolbar.title = category          // e.g."Bottled Drinks"
+        toolbar.setNavigationOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
 
         adapter = StoreAdapter(
             emptyList(),
