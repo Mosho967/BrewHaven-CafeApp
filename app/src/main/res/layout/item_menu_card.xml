@@ -1,86 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/itemCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
-    app:cardElevation="2dp"
+    android:layout_margin="12dp"
+    app:cardCornerRadius="12dp"
     app:cardUseCompatPadding="true">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:padding="12dp">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+        <!-- IMAGE (the one your adapter can bind later) -->
+        <ImageView
+            android:id="@+id/image"
+            android:layout_width="88dp"
+            android:layout_height="88dp"
+            android:scaleType="centerCrop"
+            android:contentDescription="@string/app_name"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
-            <TextView
-                android:id="@+id/name"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:maxLines="1"
-                android:ellipsize="end"/>
-
-            <TextView
-                android:id="@+id/price"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textStyle="bold"/>
-        </LinearLayout>
-
+        <!-- NAME -->
         <TextView
-            android:id="@+id/category"
+            android:id="@+id/name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Item name"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            app:layout_constraintStart_toEndOf="@id/image"
+            app:layout_constraintTop_toTopOf="@id/image"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="12dp" />
+
+        <!-- PRICE -->
+        <TextView
+            android:id="@+id/price"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="12sp"
-            android:textColor="?attr/colorOutlineVariant"
-            android:layout_marginTop="2dp"/>
+            android:text="£0.00"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="@id/name"
+            app:layout_constraintTop_toBottomOf="@id/name"
+            android:layout_marginTop="6dp" />
 
+        <!-- CATEGORY (you can hide in list if you want) -->
+        <TextView
+            android:id="@+id/category"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Category"
+            android:textSize="12sp"
+            android:textColor="#888888"
+            app:layout_constraintStart_toStartOf="@id/price"
+            app:layout_constraintTop_toBottomOf="@id/price"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="4dp" />
+
+        <!-- DESCRIPTION (GONE by default in list view) -->
         <TextView
             android:id="@+id/description"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:maxLines="2"
-            android:ellipsize="end"/>
+            android:text=""
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="@id/name"
+            app:layout_constraintTop_toBottomOf="@id/category"
+            app:layout_constraintEnd_toEndOf="parent" />
 
+        <!-- NUTRITION (GONE in list) -->
         <TextView
             android:id="@+id/nutrition"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="12sp"
-            android:textColor="?attr/colorOutlineVariant"
-            android:layout_marginTop="6dp"/>
+            android:text=""
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="@id/name"
+            app:layout_constraintTop_toBottomOf="@id/description" />
 
+        <!-- ALLERGENS (GONE in list) -->
         <TextView
             android:id="@+id/allergens"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textSize="12sp"
-            android:layout_marginTop="4dp"
-            android:textColor="@android:color/holo_red_dark"/>
+            android:text=""
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="@id/name"
+            app:layout_constraintTop_toBottomOf="@id/nutrition"
+            app:layout_constraintEnd_toEndOf="parent" />
 
+        <!-- SOLD OUT BADGE -->
         <TextView
             android:id="@+id/soldOut"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="2dp"
-            android:text="Sold out"
-            android:textSize="12sp"
+            android:text="SOLD OUT"
+            android:textStyle="bold"
+            android:padding="6dp"
+            android:background="@drawable/bg_sold_out_pill"
             android:textColor="@android:color/white"
-            android:backgroundTint="@android:color/holo_red_dark"
-            android:background="@drawable/rounded_bg_red"
-            android:visibility="gone"/>
-    </LinearLayout>
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

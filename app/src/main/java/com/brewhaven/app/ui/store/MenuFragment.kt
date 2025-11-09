@@ -31,14 +31,15 @@ class MenuFragment : Fragment(R.layout.fragment_menu) {
             add(MenuRow.Category("Snacks", R.drawable.chocolate_chip_cookie, 0))
         }
 
-        adapter = MenuSectionAdapter(rows) { category ->
-            val f = StoreListFragment.newInstance(category)
+        adapter = MenuSectionAdapter(rows) { categoryTitle ->
+            val f = StoreListFragment.newInstance(categoryTitle)
             parentFragmentManager.beginTransaction()
                 .setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)
                 .replace(R.id.fragment_container, f)
                 .addToBackStack(null)
                 .commit()
         }
+
         rv.adapter = adapter
 
         // fetch counts in parallel
