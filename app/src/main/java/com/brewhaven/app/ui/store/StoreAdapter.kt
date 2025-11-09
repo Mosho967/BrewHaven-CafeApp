@@ -10,7 +10,8 @@ import com.brewhaven.app.R
 
 class StoreAdapter(
     private var items: List<MenuItemModel>,
-    private val onClick: (MenuItemModel) -> Unit
+    private val onClick: (MenuItemModel) -> Unit,
+    private val showCategory: Boolean = false // kept for future, unused in slim row
 ) : RecyclerView.Adapter<StoreAdapter.VH>() {
 
     inner class VH(v: View) : RecyclerView.ViewHolder(v) {
@@ -26,29 +27,21 @@ class StoreAdapter(
         return VH(v)
     }
 
-    override fun onBindViewHolder(h: VH, pos: Int) {
-        val item = items[pos]
-
+    override fun onBindViewHolder(h: VH, position: Int) {
+        val item = items[position]
         h.name.text = item.name
-        h.price.text = "£%.2f".format(item.price)
+        h.price.text = "£" + String.format("%.2f", item.price)
 
-        // show "Sold Out" tag when not available
-        if (!item.available) {
-            h.soldOut.visibility = View.VISIBLE
-            h.itemView.alpha = 0.5f
-        } else {
-            h.soldOut.visibility = View.GONE
-            h.itemView.alpha = 1f
-        }
+        h.soldOut.visibility = if (item.available) View.GONE else View.VISIBLE
+        h.itemView.alpha = if (item.available) 1f else 0.5f
 
-        // TODO: set h.image.setImageResource(...) once mapping drawable → item is added
+        // placeholder until we wire up images:
+        // h.image.setImageResource(R.drawable.ic_image_placeholder)
 
-        h.itemView.setOnClickListener {
-            if (item.available) onClick(item)
-        }
+        h.itemView.setOnClickListener { onClick(item) }
     }
 
-    override fun getItemCount() = items.size
+    override fun getItemCount(): Int = items.size
 
     fun submit(newItems: List<MenuItemModel>) {
         items = newItems
