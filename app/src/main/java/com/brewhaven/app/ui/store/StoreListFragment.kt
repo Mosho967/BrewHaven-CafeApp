@@ -31,16 +31,21 @@ class StoreListFragment : Fragment(R.layout.fragment_store_list) {
         val progress = view.findViewById<View>(R.id.progress)
         val errorText = view.findViewById<TextView>(R.id.errorText)
 
-        adapter = StoreAdapter(emptyList()) { item ->
-            parentFragmentManager.beginTransaction()
-                .setCustomAnimations(
-                    R.anim.fade_in, R.anim.fade_out,
-                    R.anim.fade_in, R.anim.fade_out
-                )
-                .replace(R.id.fragment_container, ItemDetailFragment.newInstance(item))
-                .addToBackStack(null)
-                .commit()
-        }
+        adapter = StoreAdapter(
+            emptyList(),
+            onClick = { item ->
+                parentFragmentManager.beginTransaction()
+                    .setCustomAnimations(
+                        R.anim.fade_in, R.anim.fade_out,
+                        R.anim.fade_in, R.anim.fade_out
+                    )
+                    .replace(R.id.fragment_container, ItemDetailFragment.newInstance(item))
+                    .addToBackStack(null)
+                    .commit()
+            },
+            showCategory = false
+        )
+
         list.adapter = adapter
 
         progress.visibility = View.VISIBLE
