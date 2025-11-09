@@ -2,10 +2,8 @@ package com.brewhaven.app.ui.store
 
 import android.os.Bundle
 import android.view.View
-import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.brewhaven.app.R
 import com.google.firebase.firestore.FirebaseFirestore
@@ -13,7 +11,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 class StoreListFragment : Fragment(R.layout.fragment_store_list) {
 
     companion object {
-        private const val ARG_CATEGORY = "category"
+        private const val ARG_CATEGORY = "arg_category"
+
         fun newInstance(category: String) = StoreListFragment().apply {
             arguments = Bundle().apply { putString(ARG_CATEGORY, category) }
         }
@@ -24,42 +23,64 @@ class StoreListFragment : Fragment(R.layout.fragment_store_list) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val title = view.findViewById<TextView>(R.id.storeTitle)
-        val empty = view.findViewById<TextView>(R.id.storeEmpty)
-        val progress = view.findViewById<ProgressBar>(R.id.storeProgress)
-        val list = view.findViewById<RecyclerView>(R.id.storeRecycler)
 
-        val category = requireArguments().getString(ARG_CATEGORY) ?: ""
-        title.text = category
+        val category = requireArguments().getString(ARG_CATEGORY)
+            ?: error("Category missing")
+
+        val list = view.findViewById<RecyclerView>(R.id.storeList)
+        val progress = view.findViewById<View>(R.id.progress)
+        val errorText = view.findViewById<TextView>(R.id.errorText)
 
         adapter = StoreAdapter(emptyList()) { item ->
-            // open detail
             parentFragmentManager.beginTransaction()
-                .setCustomAnimations(R.anim.fade_in, R.anim.fade_out,
-                    R.anim.fade_in, R.anim.fade_out)
+                .setCustomAnimations(
+                    R.anim.fade_in, R.anim.fade_out,
+                    R.anim.fade_in, R.anim.fade_out
+                )
                 .replace(R.id.fragment_container, ItemDetailFragment.newInstance(item))
                 .addToBackStack(null)
                 .commit()
         }
-        list.layoutManager = LinearLayoutManager(requireContext())
         list.adapter = adapter
 
         progress.visibility = View.VISIBLE
-        empty.visibility = View.GONE
+        errorText.visibility = View.GONE
 
+        // Load ALL items for this category (available + sold-out)
         db.collection("menu_items")
             .whereEqualTo("category", category)
-            // show both available and unavailable; adapter already dims/labels
             .get()
             .addOnSuccessListener { snap ->
-                val items = snap.documents.map { MenuItemModel.from(it) }
-                adapter.submit(items)
-                empty.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
+                progress.visibility = View.GONE
+
+                val mapped = snap.documents.map { d ->
+                    MenuItemModel(
+                        id = d.id,
+                        name = d.getString("name") ?: "Unnamed",
+                        price = d.getDouble("price") ?: 0.0,
+                        category = d.getString("category") ?: "",
+                        available = d.getBoolean("available") ?: true,
+                        description = d.getString("description"),
+                        calories = d.getDouble("calories"),
+                        allergens = (d.get("allergens") as? List<*>)?.mapNotNull { it as? String }
+                    )
+                }
+                // Sort: available first, then by name
+                val sorted = mapped.sortedWith(
+                    compareByDescending<MenuItemModel> { it.available }.thenBy { it.name }
+                )
+
+                if (sorted.isEmpty()) {
+                    errorText.text = "No items in $category yet."
+                    errorText.visibility = View.VISIBLE
+                } else {
+                    adapter.submit(sorted)
+                }
             }
             .addOnFailureListener { e ->
-                empty.text = "Failed: ${e.localizedMessage}"
-                empty.visibility = View.VISIBLE
+                progress.visibility = View.GONE
+                errorText.text = "Failed to load $category: ${e.localizedMessage}"
+                errorText.visibility = View.VISIBLE
             }
-            .addOnCompleteListener { progress.visibility = View.GONE }
     }
 }

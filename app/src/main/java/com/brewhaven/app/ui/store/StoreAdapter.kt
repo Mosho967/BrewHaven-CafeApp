@@ -3,6 +3,7 @@ package com.brewhaven.app.ui.store
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.brewhaven.app.R
@@ -15,11 +16,8 @@ class StoreAdapter(
     inner class VH(v: View) : RecyclerView.ViewHolder(v) {
         val name: TextView = v.findViewById(R.id.name)
         val price: TextView = v.findViewById(R.id.price)
-        val category: TextView = v.findViewById(R.id.category)
-        val description: TextView = v.findViewById(R.id.description)
-        val nutrition: TextView = v.findViewById(R.id.nutrition)
-        val allergens: TextView = v.findViewById(R.id.allergens)
         val soldOut: TextView = v.findViewById(R.id.soldOut)
+        val image: ImageView = v.findViewById(R.id.image)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -32,32 +30,23 @@ class StoreAdapter(
         val item = items[pos]
 
         h.name.text = item.name
-        h.price.text = "£" + String.format("%.2f", item.price)
-        h.category.text = item.category
-        h.description.text = item.description ?: ""
-        h.description.visibility = if (item.description.isNullOrBlank()) View.GONE else View.VISIBLE
+        h.price.text = "£%.2f".format(item.price)
 
-        if (item.calories != null) {
-            h.nutrition.text = "${item.calories.toInt()} kcal"
-            h.nutrition.visibility = View.VISIBLE
+        // show "Sold Out" tag when not available
+        if (!item.available) {
+            h.soldOut.visibility = View.VISIBLE
+            h.itemView.alpha = 0.5f
         } else {
-            h.nutrition.visibility = View.GONE
+            h.soldOut.visibility = View.GONE
+            h.itemView.alpha = 1f
         }
 
-        val chips = item.allergens?.filter { s -> s.isNotBlank() } ?: emptyList()
-        if (chips.isNotEmpty()) {
-            h.allergens.text = "Allergens: " + chips.joinToString(", ")
-            h.allergens.visibility = View.VISIBLE
-        } else {
-            h.allergens.visibility = View.GONE
+        // TODO: set h.image.setImageResource(...) once mapping drawable → item is added
+
+        h.itemView.setOnClickListener {
+            if (item.available) onClick(item)
         }
-
-        h.soldOut.visibility = if (item.available) View.GONE else View.VISIBLE
-        h.itemView.alpha = if (item.available) 1f else 0.5f
-
-        h.itemView.setOnClickListener { onClick(item) }
     }
-
 
     override fun getItemCount() = items.size
 
