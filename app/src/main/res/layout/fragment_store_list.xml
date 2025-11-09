@@ -1,12 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Top app bar -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"
@@ -17,11 +14,9 @@
         app:navigationIcon="@drawable/ic_arrow_back_24"
         android:background="?attr/colorSurface"
         app:titleTextColor="?attr/colorOnSurface"
-        tools:title="Bottled Drinks"
         android:paddingStart="8dp"
-        android:paddingEnd="8dp"/>
+        android:paddingEnd="8dp" />
 
-    <!-- The list of items -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/storeList"
         android:layout_width="0dp"
@@ -33,7 +28,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Loading spinner -->
     <ProgressBar
         android:id="@+id/progress"
         style="?android:attr/progressBarStyleLarge"
@@ -45,7 +39,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Error / empty state -->
     <TextView
         android:id="@+id/errorText"
         android:layout_width="0dp"
