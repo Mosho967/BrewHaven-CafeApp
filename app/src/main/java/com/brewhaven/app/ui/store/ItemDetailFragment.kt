@@ -8,6 +8,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.brewhaven.app.R
+import com.brewhaven.app.data.CartRepository
+import com.brewhaven.app.data.FavoritesRepository
 import com.google.android.material.appbar.MaterialToolbar
 
 class ItemDetailFragment : Fragment(R.layout.fragment_item_detail) {
@@ -24,15 +26,15 @@ class ItemDetailFragment : Fragment(R.layout.fragment_item_detail) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        item = requireArguments().getParcelable(ARG_ITEM)
-            ?: error("Item missing")
+        item = requireArguments().getParcelable(ARG_ITEM) ?: error("Item missing")
 
+        // UI refs
         val image = view.findViewById<ImageView>(R.id.image)
-        val title = view.findViewById<TextView>(R.id.title)
-        val price = view.findViewById<TextView>(R.id.price)
-        val kcal = view.findViewById<TextView>(R.id.kcal)
-        val allergens = view.findViewById<TextView>(R.id.allergens)
-        val desc = view.findViewById<TextView>(R.id.description)
+        val titleText = view.findViewById<TextView>(R.id.title)
+        val priceText = view.findViewById<TextView>(R.id.price)
+        val kcalText = view.findViewById<TextView>(R.id.kcal)
+        val allergensText = view.findViewById<TextView>(R.id.allergens)
+        val descText = view.findViewById<TextView>(R.id.description)
         val soldOut = view.findViewById<TextView>(R.id.soldOut)
 
         val btnMinus = view.findViewById<Button>(R.id.btnMinus)
@@ -41,33 +43,30 @@ class ItemDetailFragment : Fragment(R.layout.fragment_item_detail) {
         val btnFav = view.findViewById<Button>(R.id.btnFavorite)
         val btnAdd = view.findViewById<Button>(R.id.btnAddToCart)
 
+        val toolbar = view.findViewById<MaterialToolbar>(R.id.toolbar)
+
         // Fill UI
-        title.text = item.name
-        price.text = "£" + String.format("%.2f", item.price)
-        desc.text = item.description.orEmpty()
-        desc.visibility = if (item.description.isNullOrBlank()) View.GONE else View.VISIBLE
+        titleText.text = item.name
+        priceText.text = "£" + String.format("%.2f", item.price)
 
-        // calories
+        descText.text = item.description.orEmpty()
+        descText.visibility = if (item.description.isNullOrBlank()) View.GONE else View.VISIBLE
+
         item.calories?.let {
-            kcal.text = "${it.toInt()} kcal"
-            kcal.visibility = View.VISIBLE
-        } ?: run {
-            kcal.visibility = View.GONE
-        }
-
+            kcalText.text = "${it.toInt()} kcal"
+            kcalText.visibility = View.VISIBLE
+        } ?: run { kcalText.visibility = View.GONE }
 
         val chips = item.allergens?.filter { it.isNotBlank() }.orEmpty()
         if (chips.isNotEmpty()) {
-            allergens.text = "Allergens: ${chips.joinToString(", ")}"
-            allergens.visibility = View.VISIBLE
+            allergensText.text = "Allergens: ${chips.joinToString(", ")}"
+            allergensText.visibility = View.VISIBLE
         } else {
-            allergens.visibility = View.GONE
+            allergensText.visibility = View.GONE
         }
 
-        // Image:map name to drawable ("still_water_500ml.png" etc)
         image.setImageResource(nameToDrawable(item.name) ?: R.drawable.ic_image_placeholder)
 
-        // Sold out treatment
         val available = item.available
         soldOut.visibility = if (available) View.GONE else View.VISIBLE
         btnAdd.isEnabled = available
@@ -76,6 +75,7 @@ class ItemDetailFragment : Fragment(R.layout.fragment_item_detail) {
         view.alpha = if (available) 1f else 0.9f
 
         // Qty steppers
+        qty = 1
         qtyText.text = qty.toString()
         btnMinus.setOnClickListener {
             if (qty > 1) {
@@ -90,31 +90,35 @@ class ItemDetailFragment : Fragment(R.layout.fragment_item_detail) {
             }
         }
 
-        // Favorite: visual toggle stub for now
-        var fav = false
-        btnFav.setOnClickListener {
-            fav = !fav
+        // Favorites
+        var fav = FavoritesRepository.isFav(item.id)
+        fun renderFav() {
             btnFav.text = if (fav) "♥ Favorited" else "♡ Favorite"
-            // later: FavoritesStore.toggle(item.id)
+        }
+        renderFav()
+        btnFav.setOnClickListener {
+            FavoritesRepository.toggle(item.id)
+            fav = !fav
+            renderFav()
+            Toast.makeText(
+                requireContext(),
+                if (fav) "Added to favourites" else "Removed from favourites",
+                Toast.LENGTH_SHORT
+            ).show()
         }
 
-        val toolbar = view.findViewById<MaterialToolbar>(R.id.toolbar)
-        toolbar.title = item.name
-        toolbar.setNavigationOnClickListener {
-            parentFragmentManager.popBackStack()
-        }
-
-        // temporary cart stub
+        // Add to cart
         btnAdd.setOnClickListener {
-            Toast.makeText(requireContext(), "Added ${qty} × ${item.name}", Toast.LENGTH_SHORT).show()
-            // later: CartRepository.add(item, qty)
+            CartRepository.add(item, qty)
+            Toast.makeText(requireContext(), "Added $qty × ${item.name}", Toast.LENGTH_SHORT).show()
         }
+
+        // Toolbar
+        toolbar.title = item.name
+        toolbar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
     }
 
-    /**
-     * Map a human name to a drawable.
-     * Example: "Still Water 500ml" -> R.drawable.still_water_500ml
-     */
+    // "Still Water 500ml" - R.drawable.still_water_500ml
     private fun nameToDrawable(name: String): Int? {
         val slug = name.lowercase()
             .replace("&", "and")
