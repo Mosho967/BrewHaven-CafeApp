@@ -11,7 +11,7 @@ import com.brewhaven.app.R
 class StoreAdapter(
     private var items: List<MenuItemModel>,
     private val onClick: (MenuItemModel) -> Unit,
-    private val showCategory: Boolean = false // kept for future, unused in slim row
+    private val showCategory: Boolean = false // kept for future, unused for now
 ) : RecyclerView.Adapter<StoreAdapter.VH>() {
 
     inner class VH(v: View) : RecyclerView.ViewHolder(v) {
