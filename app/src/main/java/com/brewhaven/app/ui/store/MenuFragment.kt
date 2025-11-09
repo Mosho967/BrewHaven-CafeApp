@@ -23,7 +23,7 @@ class MenuFragment : Fragment(R.layout.fragment_menu) {
         val rows = mutableListOf<MenuRow>().apply {
             add(MenuRow.Header("Drinks"))
             add(MenuRow.Category("Bottled Drinks", R.drawable.still_water_500ml, 0))
-            add(MenuRow.Category("Espresso Drinks", R.drawable.espresso_single, 0))
+            add(MenuRow.Category("Espresso Drinks", R.drawable.espresso, 0))
             add(MenuRow.Category("Teas", R.drawable.green_tea, 0))
             add(MenuRow.Header("Food"))
             add(MenuRow.Category("Breakfast", R.drawable.bacon_roll, 0))

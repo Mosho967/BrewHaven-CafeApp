@@ -27,19 +27,21 @@ class StoreAdapter(
         return VH(v)
     }
 
-    override fun onBindViewHolder(h: VH, position: Int) {
-        val item = items[position]
+    override fun onBindViewHolder(h: VH, pos: Int) {
+        val item = items[pos]
+
         h.name.text = item.name
         h.price.text = "£" + String.format("%.2f", item.price)
+
+        val ctx = h.itemView.context
+        h.image.setImageResource(ImageResolver.imageResFor(ctx, item.name))
 
         h.soldOut.visibility = if (item.available) View.GONE else View.VISIBLE
         h.itemView.alpha = if (item.available) 1f else 0.5f
 
-        // placeholder until we wire up images:
-        // h.image.setImageResource(R.drawable.ic_image_placeholder)
-
         h.itemView.setOnClickListener { onClick(item) }
     }
+
 
     override fun getItemCount(): Int = items.size
 
