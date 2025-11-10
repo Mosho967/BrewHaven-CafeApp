@@ -5,19 +5,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Back arrow bar -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        app:navigationIcon="@drawable/ic_arrow_back_24"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:navigationIcon="@drawable/ic_arrow_back_24"
-        android:background="?attr/colorSurface"
-        app:titleTextColor="?attr/colorOnSurface"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp" />
+        app:layout_constraintEnd_toEndOf="parent"/>
+
 
     <!-- ScrollView under the bar -->
     <ScrollView
@@ -135,7 +131,7 @@
                 android:id="@+id/btnFavorite"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Favorite"
+                android:text="Favourite"
                 app:layout_constraintTop_toBottomOf="@id/qtyText"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/btnAddToCart"
