@@ -1,13 +1,14 @@
 package com.brewhaven.app.data
-
 object FavoritesRepository {
-    private val ids = linkedSetOf<String>()
-
-    fun isFav(id: String): Boolean = id in ids
+    private val favs = mutableSetOf<String>()
 
     fun toggle(id: String) {
-        if (!ids.add(id)) ids.remove(id)
+        if (favs.contains(id)) favs.remove(id) else favs.add(id)
     }
 
-    fun all(): Set<String> = ids
+    fun remove(id: String) = favs.remove(id)
+
+    fun isFav(id: String) = favs.contains(id)
+
+    fun allIds(): Set<String> = favs
 }

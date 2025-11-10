@@ -9,10 +9,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.brewhaven.app.R
 import com.brewhaven.app.ui.store.MenuItemModel
 
-class FavoriteAdapter(
+class FavouritesAdapter(
     private val onClick: (MenuItemModel) -> Unit,
     private val onToggleHeart: (String) -> Unit
-) : RecyclerView.Adapter<FavoriteAdapter.VH>() {
+) : RecyclerView.Adapter<FavouritesAdapter.VH>() {
 
     private var items: List<MenuItemModel> = emptyList()
 

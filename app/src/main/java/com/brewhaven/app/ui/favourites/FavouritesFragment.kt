@@ -1,4 +1,4 @@
-package com.brewhaven.app.ui.store
+package com.brewhaven.app.ui.favourites
 
 import android.os.Bundle
 import android.view.View
@@ -8,57 +8,65 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.brewhaven.app.R
 import com.brewhaven.app.data.FavoritesRepository
-import com.google.android.material.appbar.MaterialToolbar
+import com.brewhaven.app.ui.store.ItemDetailFragment
+import com.brewhaven.app.ui.store.MenuItemModel
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FieldPath
 
-
-class FavoritesFragment : Fragment(R.layout.fragment_favorites) {
+class FavouritesFragment : Fragment(R.layout.fragment_favourites) {
 
     private val db by lazy { FirebaseFirestore.getInstance() }
-    private lateinit var adapter: FavoriteAdapter
+    private lateinit var adapter: FavouritesAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        view.findViewById<MaterialToolbar>(R.id.toolbar).apply {
-            setNavigationOnClickListener { parentFragmentManager.popBackStack() }
-        }
-
         val list = view.findViewById<RecyclerView>(R.id.favList)
         val empty = view.findViewById<TextView>(R.id.emptyText)
+        val progress = view.findViewById<View>(R.id.progress)
+
         list.layoutManager = GridLayoutManager(requireContext(), 2)
-        adapter = FavoriteAdapter(
+
+        adapter = FavouritesAdapter(
             onClick = { item ->
                 parentFragmentManager.beginTransaction()
-                    .setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)
+                    .setCustomAnimations(
+                        R.anim.fade_in, R.anim.fade_out,
+                        R.anim.fade_in, R.anim.fade_out
+                    )
                     .replace(R.id.fragment_container, ItemDetailFragment.newInstance(item))
-                    .addToBackStack(null).commit()
+                    .addToBackStack(null)
+                    .commit()
             },
-            onToggleHeart = { id ->
-                FavoritesRepository.toggle(id)
-                loadData(list, empty) // refresh after un-heart
+            onToggleHeart = { itemId ->
+                FavoritesRepository.remove(itemId)
+
+                loadFavs(progress, empty)
             }
         )
         list.adapter = adapter
 
-        loadData(list, empty)
+        loadFavs(progress, empty)
     }
 
-    private fun loadData(list: RecyclerView, empty: TextView) {
-        val ids = FavoritesRepository.all()
+    private fun loadFavs(progress: View, empty: TextView) {
+        val ids = FavoritesRepository.allIds()
         if (ids.isEmpty()) {
-            adapter.submit(emptyList())
+            progress.visibility = View.GONE
             empty.visibility = View.VISIBLE
+            adapter.submit(emptyList())
             return
         }
-        // Firestore whereIn supports 10 per call; batch if needed
-        val chunks = ids.chunked(10)
+
+        progress.visibility = View.VISIBLE
+        empty.visibility = View.GONE
+
+        val batches = ids.chunked(10)
         val results = mutableListOf<MenuItemModel>()
-        var remaining = chunks.size
-        chunks.forEach { chunk ->
+        var done = 0
+
+        batches.forEach { chunk ->
             db.collection("menu_items")
-                .whereIn(FieldPath.documentId(), chunk)
+                .whereIn("__name__", chunk)
                 .get()
                 .addOnSuccessListener { snap ->
                     results += snap.documents.map { d ->
@@ -75,11 +83,15 @@ class FavoritesFragment : Fragment(R.layout.fragment_favorites) {
                     }
                 }
                 .addOnCompleteListener {
-                    remaining--
-                    if (remaining == 0) {
-                        results.sortBy { it.name }
-                        adapter.submit(results)
-                        empty.visibility = if (results.isEmpty()) View.VISIBLE else View.GONE
+                    done++
+                    if (done == batches.size) {
+                        progress.visibility = View.GONE
+                        if (results.isEmpty()) {
+                            empty.visibility = View.VISIBLE
+                            adapter.submit(emptyList())
+                        } else {
+                            adapter.submit(results.sortedBy { it.name })
+                        }
                     }
                 }
         }
