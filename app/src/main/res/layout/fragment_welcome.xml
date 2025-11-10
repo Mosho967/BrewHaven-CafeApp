@@ -6,9 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Background image -->
-
-    <!-- Login Button -->
     <ImageView
         android:id="@+id/imageView4"
         android:layout_width="0dp"
@@ -19,11 +16,28 @@
         android:src="@drawable/_70a17f4_00a5_4a4e_acd1_8c9b4f6bfa22__1_"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
         tools:ignore="MissingConstraints" />
+
+    <!-- "New customer?" Sign Up link -->
+
+    <!-- Sign In button -->
+    <Button
+        android:id="@+id/buttonSignUp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="3dp"
+        android:backgroundTint="#663232"
+        android:clickable="true"
+        android:focusable="true"
+        android:text="New customer? Create an account"
+        android:textColor="#D7B7B7"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@id/button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/button"
