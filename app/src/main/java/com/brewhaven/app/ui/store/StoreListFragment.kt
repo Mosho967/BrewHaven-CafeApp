@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
+import com.brewhaven.app.MainActivity
 import com.brewhaven.app.R
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.android.material.appbar.MaterialToolbar
@@ -89,10 +90,17 @@ class StoreListFragment : Fragment(R.layout.fragment_store_list) {
                     adapter.submit(sorted)
                 }
             }
+
             .addOnFailureListener { e ->
                 progress.visibility = View.GONE
                 errorText.text = "Failed to load $category: ${e.localizedMessage}"
                 errorText.visibility = View.VISIBLE
             }
+
     }
+    override fun onResume() {
+        super.onResume()
+        (activity as? MainActivity)?.setBottomNavVisible(true)
+    }
+
 }

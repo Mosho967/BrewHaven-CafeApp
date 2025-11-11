@@ -85,4 +85,8 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
                 }
         }
     }
+    override fun onResume() {
+        super.onResume()
+        (activity as? MainActivity)?.setBottomNavVisible(false)
+    }
 }

@@ -6,6 +6,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.brewhaven.app.MainActivity
 import com.brewhaven.app.R
 import com.brewhaven.app.data.FavoritesRepository
 import com.brewhaven.app.ui.store.ItemDetailFragment
@@ -39,10 +40,10 @@ class FavouritesFragment : Fragment(R.layout.fragment_favourites) {
             },
             onToggleHeart = { itemId ->
                 FavoritesRepository.remove(itemId)
-
                 loadFavs(progress, empty)
             }
         )
+
         list.adapter = adapter
 
         loadFavs(progress, empty)
@@ -94,6 +95,16 @@ class FavouritesFragment : Fragment(R.layout.fragment_favourites) {
                         }
                     }
                 }
+
+
         }
+    }
+    override fun onResume() {
+        super.onResume()
+        (activity as? MainActivity)?.setBottomNavVisible(true)
+    }
+    override fun onStart() {
+        super.onStart()
+        (activity as? MainActivity)?.setBottomNavVisible(true)
     }
 }

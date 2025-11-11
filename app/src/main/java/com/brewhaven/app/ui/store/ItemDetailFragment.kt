@@ -7,6 +7,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.brewhaven.app.MainActivity
 import com.brewhaven.app.R
 import com.brewhaven.app.data.CartRepository
 import com.brewhaven.app.data.FavoritesRepository
@@ -116,6 +117,15 @@ class ItemDetailFragment : Fragment(R.layout.fragment_item_detail) {
         // Toolbar
         toolbar.title = item.name
         toolbar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (activity as? MainActivity)?.setBottomNavVisible(true)
+    }
+    override fun onStart() {
+        super.onStart()
+        (activity as? MainActivity)?.setBottomNavVisible(true)
     }
 
     // "Still Water 500ml" - R.drawable.still_water_500ml

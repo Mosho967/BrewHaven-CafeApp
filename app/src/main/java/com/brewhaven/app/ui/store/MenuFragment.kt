@@ -5,6 +5,7 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.brewhaven.app.MainActivity
 import com.brewhaven.app.R
 import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.FirebaseFirestore
@@ -16,6 +17,9 @@ class MenuFragment : Fragment(R.layout.fragment_menu) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        (activity as? MainActivity)?.setBottomNavVisible(true)
+
 
         val rv = view.findViewById<RecyclerView>(R.id.menuRecycler)
         rv.layoutManager = LinearLayoutManager(requireContext())
@@ -30,6 +34,7 @@ class MenuFragment : Fragment(R.layout.fragment_menu) {
             add(MenuRow.Category("Sandwiches", R.drawable.blt_sandwich, 0))
             add(MenuRow.Category("Snacks", R.drawable.chocolate_chip_cookie, 0))
         }
+
 
         adapter = MenuSectionAdapter(rows) { categoryTitle ->
             parentFragmentManager.beginTransaction()
@@ -57,6 +62,14 @@ class MenuFragment : Fragment(R.layout.fragment_menu) {
                     }
             }
         }
+    }
+    override fun onResume() {
+        super.onResume()
+        (activity as? MainActivity)?.setBottomNavVisible(true)
+    }
+    override fun onStart() {
+        super.onStart()
+        (activity as? MainActivity)?.setBottomNavVisible(true)
     }
 }
 

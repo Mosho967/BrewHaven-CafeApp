@@ -67,7 +67,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                     // Show bottom nav and route via tab selection
                     (activity as? MainActivity)?.apply {
                         setBottomNavVisible(true)
-                        findViewById<BottomNavigationView>(R.id.bottomNav)
+                        findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNav)
                             .selectedItemId = R.id.nav_menu
                     }
                 }
