@@ -6,9 +6,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="20dp"
-    tools:context=".ui.auth.SignUpFragment">
+    tools:context=".ui.auth.SignUpFragment"
+    android:background="?attr/colorSurface">
 
-    <com.google.android.material.appbar.MaterialToolbar
+
+
+<com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

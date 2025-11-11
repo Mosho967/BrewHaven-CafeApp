@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.brewhaven.app.MainActivity
 import com.brewhaven.app.R
+import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -18,25 +19,24 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        (activity as? MainActivity)?.setBottomNavVisible(false)
 
-        val first = view.findViewById<TextInputEditText>(R.id.editFirst)
-        val last  = view.findViewById<TextInputEditText>(R.id.editLast)
-        val email = view.findViewById<TextInputEditText>(R.id.editEmail)
-        val pass1 = view.findViewById<TextInputEditText>(R.id.editPass)
-        val pass2 = view.findViewById<TextInputEditText>(R.id.editPass2)
-        val btnSignUp = view.findViewById<Button>(R.id.btnCreate)
-        val toolbar = view.findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbar)
+        val first  = view.findViewById<TextInputEditText>(R.id.editFirst)
+        val last   = view.findViewById<TextInputEditText>(R.id.editLast)
+        val email  = view.findViewById<TextInputEditText>(R.id.editEmail)
+        val pass1  = view.findViewById<TextInputEditText>(R.id.editPass)
+        val pass2  = view.findViewById<TextInputEditText>(R.id.editPass2)
+        val btn    = view.findViewById<Button>(R.id.btnCreate)
+        val bar    = view.findViewById<MaterialToolbar>(R.id.toolbar)
 
-        toolbar.setNavigationOnClickListener {
-            parentFragmentManager.popBackStack() // go back to Welcome
-        }
+        bar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
 
-        btnSignUp.setOnClickListener {
-            val f = first.text.toString().trim()
-            val l = last.text.toString().trim()
-            val e = email.text.toString().trim()
-            val p1 = pass1.text.toString()
-            val p2 = pass2.text.toString()
+        btn.setOnClickListener {
+            val f  = first.text?.toString()?.trim().orEmpty()
+            val l  = last.text?.toString()?.trim().orEmpty()
+            val e  = email.text?.toString()?.trim().orEmpty()
+            val p1 = pass1.text?.toString().orEmpty()
+            val p2 = pass2.text?.toString().orEmpty()
 
             if (f.isEmpty() || l.isEmpty() || e.isEmpty() || p1.length < 6) {
                 Toast.makeText(requireContext(), "Fill all fields (password ≥ 6)", Toast.LENGTH_SHORT).show()
@@ -47,34 +47,22 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
                 return@setOnClickListener
             }
 
-            // Firebase Auth sign-up first
+            btn.isEnabled = false
+
             auth.createUserWithEmailAndPassword(e, p1)
                 .addOnSuccessListener { task ->
                     val uid = task.user?.uid ?: return@addOnSuccessListener
-                    val user = hashMapOf(
+                    val userDoc = hashMapOf(
                         "firstName" to f,
-                        "lastName" to l,
-                        "email" to e,
+                        "lastName"  to l,
+                        "email"     to e,
                         "createdAt" to System.currentTimeMillis(),
-                        "isActive" to true
+                        "isActive"  to true
                     )
-
-                    // Save user info to Firestore
-                    db.collection("users").document(uid).set(user)
+                    db.collection("users").document(uid).set(userDoc)
                         .addOnSuccessListener {
                             Toast.makeText(requireContext(), "Welcome, $f!", Toast.LENGTH_SHORT).show()
-
-                            // clear auth stack and show menu
-                            parentFragmentManager.popBackStack(
-                                null,
-                                androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE
-                            )
-
-                            (activity as? MainActivity)?.apply {
-                                setBottomNavVisible(true)
-                                findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNav)
-                                    .selectedItemId = R.id.nav_menu
-                            }
+                            (activity as? MainActivity)?.startAppFromAuth()
                         }
                         .addOnFailureListener {
                             Toast.makeText(requireContext(), "User saved but Firestore failed.", Toast.LENGTH_SHORT).show()
@@ -83,6 +71,12 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
                 .addOnFailureListener { err ->
                     Toast.makeText(requireContext(), err.localizedMessage ?: "Signup failed", Toast.LENGTH_SHORT).show()
                 }
+                .addOnCompleteListener { btn.isEnabled = true }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (activity as? MainActivity)?.setBottomNavVisible(false)
     }
 }

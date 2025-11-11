@@ -1,31 +1,28 @@
+// com.brewhaven.app.data.CartRepository
 package com.brewhaven.app.data
 
 import com.brewhaven.app.ui.store.MenuItemModel
 
-data class CartItem(val item: MenuItemModel, var qty: Int)
-
 object CartRepository {
-    private val items = linkedMapOf<String, CartItem>() // key = item.id
+    data class Line(val item: MenuItemModel, var qty: Int)
 
-    fun all(): List<CartItem> = items.values.toList()
+    private val lines = mutableListOf<Line>()
 
     fun add(item: MenuItemModel, qty: Int) {
-        val cur = items[item.id]?.qty ?: 0
-        items[item.id] = CartItem(item, (cur + qty).coerceIn(1, 20))
+        val existing = lines.firstOrNull { it.item.id == item.id }
+        if (existing != null) existing.qty += qty
+        else lines += Line(item, qty)
     }
 
-    fun setQty(itemId: String, qty: Int) {
-        items[itemId]?.qty = qty.coerceIn(1, 20)
+    fun inc(itemId: String) { lines.firstOrNull { it.item.id == itemId }?.apply { qty++ } }
+    fun dec(itemId: String) {
+        lines.firstOrNull { it.item.id == itemId }?.apply {
+            qty--; if (qty <= 0) lines.remove(this)
+        }
     }
+    fun remove(itemId: String) { lines.removeAll { it.item.id == itemId } }
+    fun clear() { lines.clear() }
 
-    fun remove(itemId: String) {
-        items.remove(itemId)
-    }
-
-    fun clear() {
-        items.clear()
-    }
-
-    fun total(): Double =
-        items.values.sumOf { it.item.price * it.qty }
+    fun items(): List<Line> = lines.toList()
+    fun total(): Double = lines.sumOf { it.item.price * it.qty }
 }

@@ -5,8 +5,8 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
-    android:background="@android:color/white"
-    android:padding="32dp">
+    android:padding="32dp"
+    android:background="?attr/colorSurface">
 
     <ImageView
         android:id="@+id/imageView"

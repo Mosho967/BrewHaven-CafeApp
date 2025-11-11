@@ -12,33 +12,26 @@ class WelcomeFragment : Fragment(R.layout.fragment_welcome) {
         super.onViewCreated(view, savedInstanceState)
         (activity as? MainActivity)?.setBottomNavVisible(false)
 
-
-        val btnLogin = view.findViewById<Button>(R.id.button)
-        val btnSignUp = view.findViewById<Button>(R.id.buttonSignUp) // Sign Up button
+        val btnLogin  = view.findViewById<Button>(R.id.button)
+        val btnSignUp = view.findViewById<Button>(R.id.buttonSignUp)
 
         btnLogin.setOnClickListener {
             parentFragmentManager.beginTransaction()
-                .setCustomAnimations(
-                    R.anim.fade_in, R.anim.fade_out,
-                    R.anim.fade_in, R.anim.fade_out
-                )
+                .setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)
                 .replace(R.id.fragment_container, LoginFragment())
                 .addToBackStack(null)
                 .commit()
         }
 
-        btnSignUp?.setOnClickListener {
+        btnSignUp.setOnClickListener {
             parentFragmentManager.beginTransaction()
-                .setCustomAnimations(
-                    R.anim.fade_in, R.anim.fade_out,
-                    R.anim.fade_in, R.anim.fade_out
-                )
+                .setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)
                 .replace(R.id.fragment_container, SignUpFragment())
                 .addToBackStack(null)
                 .commit()
         }
-
     }
+
     override fun onResume() {
         super.onResume()
         (activity as? MainActivity)?.setBottomNavVisible(false)

@@ -7,6 +7,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.brewhaven.app.MainActivity
 import com.brewhaven.app.R
 import com.brewhaven.app.data.CartRepository
 import com.brewhaven.app.data.FavoritesRepository
@@ -28,22 +29,22 @@ class ItemDetailFragment : Fragment(R.layout.fragment_item_detail) {
         super.onViewCreated(view, savedInstanceState)
         item = requireArguments().getParcelable(ARG_ITEM) ?: error("Item missing")
 
-        // UI refs
-        val image = view.findViewById<ImageView>(R.id.image)
-        val titleText = view.findViewById<TextView>(R.id.title)
-        val priceText = view.findViewById<TextView>(R.id.price)
-        val kcalText = view.findViewById<TextView>(R.id.kcal)
-        val allergensText = view.findViewById<TextView>(R.id.allergens)
-        val descText = view.findViewById<TextView>(R.id.description)
-        val soldOut = view.findViewById<TextView>(R.id.soldOut)
+        // Let the Activity control the bottom nav. Do NOT force it here.
+        // (activity as? MainActivity)?.setBottomNavVisible(true)  <-- remove
 
-        val btnMinus = view.findViewById<Button>(R.id.btnMinus)
-        val btnPlus = view.findViewById<Button>(R.id.btnPlus)
-        val qtyText = view.findViewById<TextView>(R.id.qtyText)
-        val btnFav = view.findViewById<Button>(R.id.btnFavorite)
-        val btnAdd = view.findViewById<Button>(R.id.btnAddToCart)
-
-        val toolbar = view.findViewById<MaterialToolbar>(R.id.toolbar)
+        val image       = view.findViewById<ImageView>(R.id.image)
+        val titleText   = view.findViewById<TextView>(R.id.title)
+        val priceText   = view.findViewById<TextView>(R.id.price)
+        val kcalText    = view.findViewById<TextView>(R.id.kcal)
+        val allergens   = view.findViewById<TextView>(R.id.allergens)
+        val descText    = view.findViewById<TextView>(R.id.description)
+        val soldOut     = view.findViewById<TextView>(R.id.soldOut)
+        val btnMinus    = view.findViewById<Button>(R.id.btnMinus)
+        val btnPlus     = view.findViewById<Button>(R.id.btnPlus)
+        val qtyText     = view.findViewById<TextView>(R.id.qtyText)
+        val btnFav      = view.findViewById<Button>(R.id.btnFavorite)
+        val btnAdd      = view.findViewById<Button>(R.id.btnAddToCart)
+        val toolbar     = view.findViewById<MaterialToolbar>(R.id.toolbar)
 
         // Fill UI
         titleText.text = item.name
@@ -59,10 +60,10 @@ class ItemDetailFragment : Fragment(R.layout.fragment_item_detail) {
 
         val chips = item.allergens?.filter { it.isNotBlank() }.orEmpty()
         if (chips.isNotEmpty()) {
-            allergensText.text = "Allergens: ${chips.joinToString(", ")}"
-            allergensText.visibility = View.VISIBLE
+            allergens.text = "Allergens: ${chips.joinToString(", ")}"
+            allergens.visibility = View.VISIBLE
         } else {
-            allergensText.visibility = View.GONE
+            allergens.visibility = View.GONE
         }
 
         image.setImageResource(nameToDrawable(item.name) ?: R.drawable.ic_image_placeholder)
@@ -90,11 +91,9 @@ class ItemDetailFragment : Fragment(R.layout.fragment_item_detail) {
             }
         }
 
-        // Favorites
+        // Favorites toggle
         var fav = FavoritesRepository.isFav(item.id)
-        fun renderFav() {
-            btnFav.text = if (fav) "♥ Favorited" else "♡ Favorite"
-        }
+        fun renderFav() { btnFav.text = if (fav) "♥ Favorited" else "♡ Favorite" }
         renderFav()
         btnFav.setOnClickListener {
             FavoritesRepository.toggle(item.id)
@@ -113,12 +112,15 @@ class ItemDetailFragment : Fragment(R.layout.fragment_item_detail) {
             Toast.makeText(requireContext(), "Added $qty × ${item.name}", Toast.LENGTH_SHORT).show()
         }
 
-        // Toolbar
+        // Back arrow: just pop. The Activity will clear back stack on tab taps anyway.
         toolbar.title = item.name
         toolbar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
     }
 
-    // "Still Water 500ml" - R.drawable.still_water_500ml
+    // Remove onStart/onResume bottom-nav forcing. It causes races and flicker.
+    // override fun onResume() { ... }  <-- delete
+    // override fun onStart()  { ... }  <-- delete
+
     private fun nameToDrawable(name: String): Int? {
         val slug = name.lowercase()
             .replace("&", "and")
