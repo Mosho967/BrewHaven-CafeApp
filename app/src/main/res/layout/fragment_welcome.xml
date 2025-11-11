@@ -10,10 +10,10 @@
     <ImageView
         android:id="@+id/imageView4"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="900dp"
         android:scaleType="fitCenter"
         android:scaleX="1.24"
-        android:scaleY="1.24"
+        android:scaleY="1.35"
         android:src="@drawable/_70a17f4_00a5_4a4e_acd1_8c9b4f6bfa22__1_"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

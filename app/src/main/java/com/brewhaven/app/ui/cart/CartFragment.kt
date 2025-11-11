@@ -11,6 +11,7 @@ import com.brewhaven.app.MainActivity
 import com.brewhaven.app.R
 import com.brewhaven.app.data.CartRepository
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
 
 class CartFragment : Fragment(R.layout.fragment_cart) {
@@ -23,20 +24,21 @@ class CartFragment : Fragment(R.layout.fragment_cart) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // show bottom nav
+        // Cart is an app screen: nav bar must be visible
         (activity as? MainActivity)?.setBottomNavVisible(true)
 
-        // toolbar
-        val toolbar = view.findViewById<MaterialToolbar>(R.id.toolbar)
-        toolbar?.title = "Cart"
-
-        val hasBack = parentFragmentManager.backStackEntryCount > 0
-
-        toolbar?.setNavigationOnClickListener {
-            if (hasBack) {
-                parentFragmentManager.popBackStack()
-            } else {
-                (activity as? MainActivity)?.selectTab(R.id.nav_menu)
+        // Toolbar + back behavior
+        view.findViewById<MaterialToolbar>(R.id.toolbar)?.apply {
+            title = "Cart"
+            setNavigationOnClickListener {
+                if (parentFragmentManager.backStackEntryCount > 0) {
+                    parentFragmentManager.popBackStack()
+                } else {
+                    // Drive the bottom nav directly back to Menu
+                    requireActivity()
+                        .findViewById<BottomNavigationView>(R.id.bottomNav)
+                        .selectedItemId = R.id.nav_menu
+                }
             }
         }
 
@@ -52,8 +54,10 @@ class CartFragment : Fragment(R.layout.fragment_cart) {
             onMinus = { item -> CartRepository.dec(item.id); render() },
             onRemove = { item -> CartRepository.remove(item.id); render() },
             nameToDrawable = { name ->
-                val slug = name.lowercase().replace("&", "and")
-                    .replace("[^a-z0-9]+".toRegex(), "_").trim('_')
+                val slug = name.lowercase()
+                    .replace("&", "and")
+                    .replace("[^a-z0-9]+".toRegex(), "_")
+                    .trim('_')
                 val res = resources.getIdentifier(slug, "drawable", requireContext().packageName)
                 if (res != 0) res else R.drawable.ic_image_placeholder
             }
@@ -64,8 +68,8 @@ class CartFragment : Fragment(R.layout.fragment_cart) {
             if (CartRepository.items().isEmpty()) {
                 Toast.makeText(requireContext(), "Cart is empty.", Toast.LENGTH_SHORT).show()
             } else {
+                // TODO: persist order + clear cart
                 Toast.makeText(requireContext(), "Pretend payment succeeded.", Toast.LENGTH_SHORT).show()
-                // TODO: persist + clear
             }
         }
 
@@ -74,10 +78,6 @@ class CartFragment : Fragment(R.layout.fragment_cart) {
 
     override fun onResume() {
         super.onResume()
-        (activity as? MainActivity)?.setBottomNavVisible(true)
-    }
-    override fun onStart() {
-        super.onStart()
         (activity as? MainActivity)?.setBottomNavVisible(true)
     }
 

@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.brewhaven.app.MainActivity
 import com.brewhaven.app.R
+import com.google.android.material.appbar.MaterialToolbar
 import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -17,9 +18,19 @@ class MenuFragment : Fragment(R.layout.fragment_menu) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         (activity as? MainActivity)?.setBottomNavVisible(true)
 
+        // Toolbar + overflow
+        val toolbar = view.findViewById<MaterialToolbar>(R.id.toolbar)
+        toolbar.title = "Menu"
+        toolbar.menu.clear()
+        toolbar.inflateMenu(R.menu.menu_overflow)
+        toolbar.setOnMenuItemClickListener { mi ->
+            if (mi.itemId == R.id.action_sign_out) {
+                (requireActivity() as MainActivity).signOutToWelcome()
+                true
+            } else false
+        }
 
         val rv = view.findViewById<RecyclerView>(R.id.menuRecycler)
         rv.layoutManager = LinearLayoutManager(requireContext())
@@ -35,7 +46,6 @@ class MenuFragment : Fragment(R.layout.fragment_menu) {
             add(MenuRow.Category("Snacks", R.drawable.chocolate_chip_cookie, 0))
         }
 
-
         adapter = MenuSectionAdapter(rows) { categoryTitle ->
             parentFragmentManager.beginTransaction()
                 .setReorderingAllowed(true)
@@ -43,11 +53,8 @@ class MenuFragment : Fragment(R.layout.fragment_menu) {
                 .addToBackStack(null)
                 .commit()
         }
-
-
         rv.adapter = adapter
 
-        // fetch counts in parallel
         rows.forEachIndexed { index, row ->
             if (row is MenuRow.Category) {
                 db.collection("menu_items")
@@ -57,23 +64,11 @@ class MenuFragment : Fragment(R.layout.fragment_menu) {
                     .addOnSuccessListener { snap ->
                         adapter.updateCountAt(index, snap.count.toInt())
                     }
-                    .addOnFailureListener {
-
-                    }
             }
         }
     }
-    override fun onResume() {
-        super.onResume()
-        (activity as? MainActivity)?.setBottomNavVisible(true)
-    }
-    override fun onStart() {
-        super.onStart()
-        (activity as? MainActivity)?.setBottomNavVisible(true)
-    }
 }
 
-// data for adapter
 sealed class MenuRow {
     data class Header(val title: String) : MenuRow()
     data class Category(val title: String, val imageRes: Int, val count: Int) : MenuRow()
