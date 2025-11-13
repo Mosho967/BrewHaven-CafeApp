@@ -6,67 +6,72 @@
     android:layout_height="match_parent"
     android:background="?attr/colorSurface">
 
+
+    <!-- ScrollView under the bar -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:navigationIcon="@drawable/ic_arrow_back_24"
-        app:layout_constraintTop_toTopOf="parent"
+        android:background="#541E1E"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@drawable/ic_arrow_back_24" />
 
-
-    <!-- ScrollView under the bar -->
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        android:background="#2B2D30"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/toolbar">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="#F0E1E1"
             android:padding="16dp">
 
-            <ImageView
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/image"
                 android:layout_width="0dp"
                 android:layout_height="350dp"
                 android:adjustViewBounds="true"
                 android:scaleType="centerCrop"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:shapeAppearanceOverlay="@style/RoundedImage" />
 
             <TextView
                 android:id="@+id/title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:textStyle="bold"
+                android:layout_marginTop="48dp"
                 android:textSize="22sp"
-                app:layout_constraintTop_toBottomOf="@id/image"
-                app:layout_constraintStart_toStartOf="parent"
+                android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginTop="48dp" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/image" />
 
             <TextView
                 android:id="@+id/price"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/title"
+                android:layout_marginTop="8dp"
                 app:layout_constraintStart_toStartOf="parent"
-                android:layout_marginTop="8dp" />
+                app:layout_constraintTop_toBottomOf="@id/title" />
 
             <TextView
                 android:id="@+id/soldOut"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="SOLD OUT"
                 android:background="@drawable/bg_chip_soldout"
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="4dp"
+                android:text="SOLD OUT"
                 android:visibility="gone"
                 app:layout_constraintBaseline_toBaselineOf="@id/price"
                 app:layout_constraintEnd_toEndOf="parent" />
@@ -76,18 +81,18 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                app:layout_constraintTop_toBottomOf="@id/price"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@id/price" />
 
             <TextView
                 android:id="@+id/kcal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                app:layout_constraintTop_toBottomOf="@id/description"
+                android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
-                android:visibility="gone" />
+                app:layout_constraintTop_toBottomOf="@id/description" />
 
             <TextView
                 android:id="@+id/allergens"
@@ -95,58 +100,62 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:visibility="gone"
-                app:layout_constraintTop_toBottomOf="@id/kcal"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@id/kcal" />
 
             <!-- quantity row -->
             <Button
                 android:id="@+id/btnMinus"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
+                android:layout_marginTop="16dp"
+                android:backgroundTint="#5F2626"
                 android:text="−"
-                app:layout_constraintTop_toBottomOf="@id/allergens"
                 app:layout_constraintStart_toStartOf="parent"
-                android:layout_marginTop="16dp" />
+                app:layout_constraintTop_toBottomOf="@id/allergens" />
 
             <TextView
                 android:id="@+id/qtyText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
                 android:text="1"
                 android:textSize="18sp"
                 app:layout_constraintBaseline_toBaselineOf="@id/btnMinus"
-                app:layout_constraintStart_toEndOf="@id/btnMinus"
-                android:layout_marginStart="12dp" />
+                app:layout_constraintStart_toEndOf="@id/btnMinus" />
 
             <Button
                 android:id="@+id/btnPlus"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
+                android:layout_marginStart="12dp"
+                android:backgroundTint="#6A2B2B"
                 android:text="+"
                 app:layout_constraintBaseline_toBaselineOf="@id/qtyText"
-                app:layout_constraintStart_toEndOf="@id/qtyText"
-                android:layout_marginStart="12dp" />
+                app:layout_constraintStart_toEndOf="@id/qtyText" />
 
             <Button
                 android:id="@+id/btnFavorite"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Favourite"
-                app:layout_constraintTop_toBottomOf="@id/qtyText"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/btnAddToCart"
                 android:layout_marginTop="32dp"
-                android:layout_marginEnd="8dp" />
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="#4D1E1E"
+                android:text="Favourite"
+                app:layout_constraintEnd_toStartOf="@id/btnAddToCart"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/qtyText" />
 
             <Button
                 android:id="@+id/btnAddToCart"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:backgroundTint="#541E1E"
                 android:text="Add to cart"
-                app:layout_constraintTop_toTopOf="@id/btnFavorite"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/btnFavorite" />
+                app:layout_constraintStart_toEndOf="@id/btnFavorite"
+                app:layout_constraintTop_toTopOf="@id/btnFavorite" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
