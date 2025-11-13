@@ -59,7 +59,7 @@ class StoreListFragment : Fragment(R.layout.fragment_store_list) {
         progress.visibility = View.VISIBLE
         errorText.visibility = View.GONE
 
-        // Load ALL items for this category (available + sold-out)
+        // Loads all items for category (available + sold-out)
         db.collection("menu_items")
             .whereEqualTo("category", category)
             .get()
