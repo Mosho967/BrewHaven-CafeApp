@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
         bottom.setOnItemReselectedListener { /* no-op */ }
 
         if (savedInstanceState == null) {
-            // Show a dumb Splash visual. It does NOT navigate.
+            // Shows a Splash visual.
             setBottomNavVisible(false)
             supportFragmentManager.commit {
                 replace(R.id.fragment_container, SplashFragment())
