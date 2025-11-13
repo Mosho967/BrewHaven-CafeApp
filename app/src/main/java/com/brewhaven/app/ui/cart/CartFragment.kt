@@ -29,6 +29,8 @@ class CartFragment : Fragment(R.layout.fragment_cart) {
 
         view.findViewById<MaterialToolbar>(R.id.toolbar)?.apply {
             title = "Cart"
+            // show back arrow (make sure you have ic_back in drawables)
+            setNavigationIcon(R.drawable.ic_arrow_back_24)
             setNavigationOnClickListener {
                 if (parentFragmentManager.backStackEntryCount > 0) {
                     parentFragmentManager.popBackStack()
@@ -63,11 +65,11 @@ class CartFragment : Fragment(R.layout.fragment_cart) {
         list.adapter = adapter
 
         btnCheckout.setOnClickListener {
-            if (CartRepository.items().isEmpty()) {
+            val items = CartRepository.items()
+            if (items.isEmpty()) {
                 Toast.makeText(requireContext(), "Cart is empty.", Toast.LENGTH_SHORT).show()
             } else {
                 btnCheckout.isEnabled = false
-                val items = CartRepository.items()
 
                 OrdersRepository.createOrder(items, "Card") { orderId ->
                     btnCheckout.isEnabled = true
@@ -81,9 +83,6 @@ class CartFragment : Fragment(R.layout.fragment_cart) {
             }
         }
 
-
-
-        // Optional live redraw if you wired CartRepository.onChange somewhere
         CartRepository.onChange = { render() }
 
         render()
@@ -94,8 +93,14 @@ class CartFragment : Fragment(R.layout.fragment_cart) {
         (activity as? MainActivity)?.setBottomNavVisible(true)
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        // stop future callbacks hitting dead views
+        CartRepository.onChange = null
+    }
+
     private fun render() {
-        val lines = CartRepository.items()              // List<CartRepository.Line>
+        val lines = CartRepository.items()
         adapter.submit(lines)
 
         val total = CartRepository.total()

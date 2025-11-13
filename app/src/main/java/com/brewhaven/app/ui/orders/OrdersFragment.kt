@@ -10,6 +10,7 @@ import com.brewhaven.app.MainActivity
 import com.brewhaven.app.R
 import com.brewhaven.app.data.OrdersRepository
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class OrdersFragment : Fragment(R.layout.fragment_orders) {
 
@@ -22,7 +23,19 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
         super.onViewCreated(view, savedInstanceState)
         (activity as? MainActivity)?.setBottomNavVisible(true)
 
-        view.findViewById<MaterialToolbar>(R.id.toolbar)?.apply { title = "Orders" }
+        view.findViewById<MaterialToolbar>(R.id.toolbar)?.apply {
+            title = "Orders"
+            setNavigationIcon(R.drawable.ic_arrow_back_24)
+            setNavigationOnClickListener {
+                if (parentFragmentManager.backStackEntryCount > 0) {
+                    parentFragmentManager.popBackStack()
+                } else {
+                    requireActivity()
+                        .findViewById<BottomNavigationView>(R.id.bottomNav)
+                        .selectedItemId = R.id.nav_menu
+                }
+            }
+        }
 
         list = view.findViewById(R.id.ordersList)
         empty = view.findViewById(R.id.emptyText)
@@ -30,15 +43,16 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
 
         list.layoutManager = LinearLayoutManager(requireContext())
         adapter = OrdersAdapter { order ->
-            // TODO: navigate to OrderDetailFragment.newInstance(order.id)
+            // later: navigate to OrderDetailFragment.newInstance(order.id)
         }
         list.adapter = adapter
 
-        // start with spinner
         showLoading(true)
 
-        // live updates from repo
-        OrdersRepository.onChange = { orders ->
+        OrdersRepository.onChange = onChange@ { orders ->
+            if (!isAdded) return@onChange
+
+            showLoading(false)
 
             if (orders.isEmpty()) {
                 empty.visibility = View.VISIBLE
@@ -50,7 +64,7 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
             }
         }
 
-        // render cached immediately if present
+
         val cached = OrdersRepository.current()
         if (cached.isNotEmpty()) {
             showLoading(false)
@@ -69,4 +83,3 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
         progress.visibility = if (show) View.VISIBLE else View.GONE
     }
 }
-

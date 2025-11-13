@@ -12,11 +12,13 @@
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorSurface"
         android:backgroundTint="#8A5E5E"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:title="Cart"
-        app:titleTextColor="#FFFFFF" />
+        app:titleTextColor="#FFFFFF"
+        app:navigationIcon="@drawable/ic_arrow_back_24"
+        app:navigationIconTint="@android:color/white" />
 
     <TextView
         android:id="@+id/emptyText"
@@ -30,6 +32,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/cartList"
         android:layout_width="0dp"
@@ -39,6 +42,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar" />
+
 
     <LinearLayout
         android:id="@+id/bottomBar"
@@ -52,6 +56,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
+
         <TextView
             android:id="@+id/totalText"
             android:layout_width="0dp"
@@ -60,6 +65,7 @@
             android:text="Total: £0.00"
             android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
             android:textColor="#EBD8D8" />
+
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCheckout"
@@ -70,4 +76,6 @@
             app:backgroundTint="#EBD8D8" />
     </LinearLayout>
 
+
 </androidx.constraintlayout.widget.ConstraintLayout>
+
