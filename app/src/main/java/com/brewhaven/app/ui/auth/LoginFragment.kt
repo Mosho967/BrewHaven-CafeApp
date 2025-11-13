@@ -31,8 +31,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
         fun validate(): Boolean {
             var ok = true
-            email.error = null
-            password.error = null
+            email.error = null; password.error = null
             val e = email.text?.toString()?.trim().orEmpty()
             val p = password.text?.toString().orEmpty()
             if (e.isEmpty()) { email.error = "Required"; ok = false }
@@ -48,11 +47,26 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             btnLogin.isEnabled = false
 
             auth.signInWithEmailAndPassword(e, p)
-                .addOnSuccessListener { (activity as? MainActivity)?.startAppFromAuth() }
-                .addOnFailureListener { err ->
-                    Toast.makeText(requireContext(), err.localizedMessage ?: "Login failed", Toast.LENGTH_SHORT).show()
+                .addOnSuccessListener {
+                    // Safety if frag is attached when enabled
+                    if (!isAdded) return@addOnSuccessListener
+
+                    // Re-enable button - later
+                    btnLogin.isEnabled = true
+                    // MainActivity AuthStateListener detects new user without colliding with nav
                 }
-                .addOnCompleteListener { btnLogin.isEnabled = true }
+                .addOnFailureListener { err ->
+                    if (isAdded) {
+                        Toast.makeText(requireContext(), err.localizedMessage, Toast.LENGTH_SHORT).show()
+                    }
+                    btnLogin.isEnabled = true
+                }
+
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (activity as? MainActivity)?.setBottomNavVisible(false)
     }
 }

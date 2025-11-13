@@ -11,6 +11,7 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 
 class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
 
@@ -52,20 +53,20 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
             auth.createUserWithEmailAndPassword(e, p1)
                 .addOnSuccessListener { task ->
                     val uid = task.user?.uid ?: return@addOnSuccessListener
-                    val userDoc = hashMapOf(
+
+                    // Seed customers/{uid} now (also mirrored by MainActivity.bindUserRepositories)
+                    val userDoc = mapOf(
                         "firstName" to f,
                         "lastName"  to l,
                         "email"     to e,
                         "createdAt" to System.currentTimeMillis(),
                         "isActive"  to true
                     )
-                    db.collection("users").document(uid).set(userDoc)
+                    db.collection("customers").document(uid)
+                        .set(userDoc, SetOptions.merge())
                         .addOnSuccessListener {
-                            Toast.makeText(requireContext(), "Welcome, $f!", Toast.LENGTH_SHORT).show()
-                            (activity as? MainActivity)?.startAppFromAuth()
-                        }
-                        .addOnFailureListener {
-                            Toast.makeText(requireContext(), "User saved but Firestore failed.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), "Account created.", Toast.LENGTH_SHORT).show()
+                            // Do NOT navigate. AuthStateListener in MainActivity will flip UI to tabs.
                         }
                 }
                 .addOnFailureListener { err ->
