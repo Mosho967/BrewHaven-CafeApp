@@ -21,10 +21,13 @@
         android:layout_height="wrap_content"
         android:background="?attr/colorSurface"
         android:elevation="8dp"
-        app:menu="@menu/menu_bottom_nav"
+        app:backgroundTint="#F6E7C6"
+        app:itemRippleColor="#E0D7D7"
+        app:itemTextColor="#715A23"
         app:labelVisibilityMode="labeled"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/menu_bottom_nav" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

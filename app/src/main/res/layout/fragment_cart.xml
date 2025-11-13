@@ -9,68 +9,65 @@
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:title="Checkout"
-        app:navigationIcon="?attr/homeAsUpIndicator"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorSurface"
+        android:backgroundTint="#8A5E5E"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/cartList"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:padding="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar"
-        app:layout_constraintBottom_toTopOf="@+id/bottomBar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:title="Cart"
+        app:titleTextColor="#FFFFFF" />
 
     <TextView
         android:id="@+id/emptyText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Your cart is empty."
-        android:textSize="16sp"
+        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
         android:visibility="gone"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintBottom_toTopOf="@id/bottomBar"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <com.google.android.material.card.MaterialCardView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/cartList"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#EDD9D9"
+        app:layout_constraintBottom_toTopOf="@id/bottomBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
+
+    <LinearLayout
         android:id="@+id/bottomBar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        app:cardElevation="4dp"
-        app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.MediumComponent"
+        android:background="#895E5E"
+        android:backgroundTint="#895E5E"
+        android:gravity="center_vertical"
+        android:padding="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/totalText"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="12dp"
-            android:gravity="center_vertical">
+            android:layout_weight="1"
+            android:text="Total: £0.00"
+            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+            android:textColor="#EBD8D8" />
 
-            <TextView
-                android:id="@+id/totalText"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="Total: £0.00"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:layout_weight="1"/>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCheckout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Checkout"
+            android:textColor="#995757"
+            app:backgroundTint="#EBD8D8" />
+    </LinearLayout>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnCheckout"
-                style="@style/Widget.MaterialComponents.Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Checkout"/>
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
 </androidx.constraintlayout.widget.ConstraintLayout>
