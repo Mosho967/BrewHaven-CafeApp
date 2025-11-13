@@ -54,7 +54,7 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
                 .addOnSuccessListener { task ->
                     val uid = task.user?.uid ?: return@addOnSuccessListener
 
-                    // Seed customers/{uid} now (also mirrored by MainActivity.bindUserRepositories)
+                    // Seed customers/{uid} now
                     val userDoc = mapOf(
                         "firstName" to f,
                         "lastName"  to l,
@@ -66,7 +66,7 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
                         .set(userDoc, SetOptions.merge())
                         .addOnSuccessListener {
                             Toast.makeText(requireContext(), "Account created.", Toast.LENGTH_SHORT).show()
-                            // Do NOT navigate. AuthStateListener in MainActivity will flip UI to tabs.
+
                         }
                 }
                 .addOnFailureListener { err ->

@@ -13,7 +13,7 @@ object ImageResolver {
             .replace("_+".toRegex(), "_")           // collapse
             .trim('_')
 
-        // opinionated fix
+
         key = key
             .replace("espresso_", "espresso_") // no-op placeholder
             .replace("blt", "blt")
