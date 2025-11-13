@@ -10,6 +10,7 @@ import com.brewhaven.app.R
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.FirebaseFirestore
+import com.brewhaven.app.ui.feedback.FeedbackFragment
 
 class MenuFragment : Fragment(R.layout.fragment_menu) {
 
@@ -26,10 +27,21 @@ class MenuFragment : Fragment(R.layout.fragment_menu) {
         toolbar.menu.clear()
         toolbar.inflateMenu(R.menu.menu_overflow)
         toolbar.setOnMenuItemClickListener { mi ->
-            if (mi.itemId == R.id.action_sign_out) {
-                (requireActivity() as MainActivity).signOutToWelcome()
-                true
-            } else false
+            when (mi.itemId) {
+                R.id.action_sign_out -> {
+                    (requireActivity() as MainActivity).signOutToWelcome()
+                    true
+                }
+                R.id.action_feedback -> {
+                    parentFragmentManager.beginTransaction()
+                        .setReorderingAllowed(true)
+                        .replace(R.id.fragment_container, FeedbackFragment())
+                        .addToBackStack(null)
+                        .commit()
+                    true
+                }
+                else -> false
+            }
         }
 
         val rv = view.findViewById<RecyclerView>(R.id.menuRecycler)

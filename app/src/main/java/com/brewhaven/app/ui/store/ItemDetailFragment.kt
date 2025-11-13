@@ -29,27 +29,24 @@ class ItemDetailFragment : Fragment(R.layout.fragment_item_detail) {
         super.onViewCreated(view, savedInstanceState)
         item = requireArguments().getParcelable(ARG_ITEM) ?: error("Item missing")
 
-        // Let the Activity control the bottom nav. Do NOT force it here.
-        // (activity as? MainActivity)?.setBottomNavVisible(true)  <-- remove
+        val image = view.findViewById<ImageView>(R.id.image)
+        val titleText = view.findViewById<TextView>(R.id.title)
+        val priceText = view.findViewById<TextView>(R.id.price)
+        val kcalText = view.findViewById<TextView>(R.id.kcal)
+        val allergensText = view.findViewById<TextView>(R.id.allergens)
+        val descText = view.findViewById<TextView>(R.id.description)
+        val soldOut = view.findViewById<TextView>(R.id.soldOut)
 
-        val image       = view.findViewById<ImageView>(R.id.image)
-        val titleText   = view.findViewById<TextView>(R.id.title)
-        val priceText   = view.findViewById<TextView>(R.id.price)
-        val kcalText    = view.findViewById<TextView>(R.id.kcal)
-        val allergens   = view.findViewById<TextView>(R.id.allergens)
-        val descText    = view.findViewById<TextView>(R.id.description)
-        val soldOut     = view.findViewById<TextView>(R.id.soldOut)
-        val btnMinus    = view.findViewById<Button>(R.id.btnMinus)
-        val btnPlus     = view.findViewById<Button>(R.id.btnPlus)
-        val qtyText     = view.findViewById<TextView>(R.id.qtyText)
-        val btnFav      = view.findViewById<Button>(R.id.btnFavorite)
-        val btnAdd      = view.findViewById<Button>(R.id.btnAddToCart)
-        val toolbar     = view.findViewById<MaterialToolbar>(R.id.toolbar)
+        val btnMinus = view.findViewById<Button>(R.id.btnMinus)
+        val btnPlus = view.findViewById<Button>(R.id.btnPlus)
+        val qtyText = view.findViewById<TextView>(R.id.qtyText)
+        val btnFav = view.findViewById<Button>(R.id.btnFavorite)
+        val btnAdd = view.findViewById<Button>(R.id.btnAddToCart)
+        val toolbar = view.findViewById<MaterialToolbar>(R.id.toolbar)
 
         // Fill UI
         titleText.text = item.name
         priceText.text = "£" + String.format("%.2f", item.price)
-
         descText.text = item.description.orEmpty()
         descText.visibility = if (item.description.isNullOrBlank()) View.GONE else View.VISIBLE
 
@@ -60,10 +57,10 @@ class ItemDetailFragment : Fragment(R.layout.fragment_item_detail) {
 
         val chips = item.allergens?.filter { it.isNotBlank() }.orEmpty()
         if (chips.isNotEmpty()) {
-            allergens.text = "Allergens: ${chips.joinToString(", ")}"
-            allergens.visibility = View.VISIBLE
+            allergensText.text = "Allergens: ${chips.joinToString(", ")}"
+            allergensText.visibility = View.VISIBLE
         } else {
-            allergens.visibility = View.GONE
+            allergensText.visibility = View.GONE
         }
 
         image.setImageResource(nameToDrawable(item.name) ?: R.drawable.ic_image_placeholder)
@@ -91,20 +88,20 @@ class ItemDetailFragment : Fragment(R.layout.fragment_item_detail) {
             }
         }
 
-        // Favorites toggle
+        // Favorites: live sync with repo
         var fav = FavoritesRepository.isFav(item.id)
         fun renderFav() { btnFav.text = if (fav) "♥ Favorited" else "♡ Favorite" }
         renderFav()
-        btnFav.setOnClickListener {
-            FavoritesRepository.toggle(item.id)
-            fav = !fav
-            renderFav()
-            Toast.makeText(
-                requireContext(),
-                if (fav) "Added to favourites" else "Removed from favourites",
-                Toast.LENGTH_SHORT
-            ).show()
+
+        FavoritesRepository.onChange = { ids ->
+            val newFav = item.id in ids
+            if (newFav != fav) {
+                fav = newFav
+                renderFav()
+            }
         }
+
+        btnFav.setOnClickListener { FavoritesRepository.toggle(item.id) }
 
         // Add to cart
         btnAdd.setOnClickListener {
@@ -112,14 +109,25 @@ class ItemDetailFragment : Fragment(R.layout.fragment_item_detail) {
             Toast.makeText(requireContext(), "Added $qty × ${item.name}", Toast.LENGTH_SHORT).show()
         }
 
-        // Back arrow: just pop. The Activity will clear back stack on tab taps anyway.
+        // Toolbar
         toolbar.title = item.name
         toolbar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
     }
 
-    // Remove onStart/onResume bottom-nav forcing. It causes races and flicker.
-    // override fun onResume() { ... }  <-- delete
-    // override fun onStart()  { ... }  <-- delete
+    override fun onDestroyView() {
+        super.onDestroyView()
+        if (FavoritesRepository.onChange != null) FavoritesRepository.onChange = null
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (activity as? MainActivity)?.setBottomNavVisible(true)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        (activity as? MainActivity)?.setBottomNavVisible(true)
+    }
 
     private fun nameToDrawable(name: String): Int? {
         val slug = name.lowercase()
