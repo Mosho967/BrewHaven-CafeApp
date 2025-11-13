@@ -3,55 +3,54 @@ package com.brewhaven.app.ui.cart
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.brewhaven.app.R
-import com.brewhaven.app.ui.store.MenuItemModel
+import com.brewhaven.app.data.CartRepository
 
 class CartAdapter(
-    private val onPlus: (MenuItemModel) -> Unit,
-    private val onMinus: (MenuItemModel) -> Unit,
-    private val onRemove: (MenuItemModel) -> Unit,
+    private val onPlus: (CartRepository.Line) -> Unit,
+    private val onMinus: (CartRepository.Line) -> Unit,
+    private val onRemove: (CartRepository.Line) -> Unit,
     private val nameToDrawable: (String) -> Int
 ) : RecyclerView.Adapter<CartAdapter.VH>() {
 
-    data class Row(val item: MenuItemModel, val qty: Int, val lineTotal: Double)
+    private val data = mutableListOf<CartRepository.Line>()
 
-    private var rows: List<Row> = emptyList()
-
-    inner class VH(v: View) : RecyclerView.ViewHolder(v) {
-        val image: ImageView = v.findViewById(R.id.image)
-        val name: TextView = v.findViewById(R.id.name)
-        val price: TextView = v.findViewById(R.id.price)
-        val qty: TextView = v.findViewById(R.id.qty)
-        val btnPlus: View = v.findViewById(R.id.btnPlus)
-        val btnMinus: View = v.findViewById(R.id.btnMinus)
-        val btnRemove: View = v.findViewById(R.id.btnRemove)
+    fun submit(items: List<CartRepository.Line>) {
+        data.clear()
+        data.addAll(items)
+        notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-        val v = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_cart_row, parent, false)
+        val v = LayoutInflater.from(parent.context).inflate(R.layout.item_cart_row, parent, false)
         return VH(v)
     }
 
-    override fun onBindViewHolder(h: VH, pos: Int) {
-        val row = rows[pos]
-        h.name.text = row.item.name
-        h.qty.text = row.qty.toString()
-        h.price.text = "£" + String.format("%.2f", row.lineTotal)
-        h.image.setImageResource(nameToDrawable(row.item.name))
+    override fun onBindViewHolder(holder: VH, position: Int) {
+        val line = data[position]
+        holder.title.text = line.name
+        holder.price.text = "£" + String.format("%.2f", line.price)
+        holder.qty.text = line.qty.toString()
+        holder.image.setImageResource(nameToDrawable(line.name))
 
-        h.btnPlus.setOnClickListener { onPlus(row.item) }
-        h.btnMinus.setOnClickListener { onMinus(row.item) }
-        h.btnRemove.setOnClickListener { onRemove(row.item) }
+        holder.btnPlus.setOnClickListener { onPlus(line) }
+        holder.btnMinus.setOnClickListener { onMinus(line) }
+        holder.btnRemove.setOnClickListener { onRemove(line) }
     }
 
-    override fun getItemCount() = rows.size
+    override fun getItemCount(): Int = data.size
 
-    fun submit(lines: List<Pair<MenuItemModel, Int>>) {
-        rows = lines.map { (item, q) -> Row(item, q, item.price * q) }
-        notifyDataSetChanged()
+    class VH(v: View) : RecyclerView.ViewHolder(v) {
+        val image: ImageView = v.findViewById(R.id.image)
+        val title: TextView = v.findViewById(R.id.title)
+        val price: TextView = v.findViewById(R.id.price)
+        val qty: TextView = v.findViewById(R.id.qty)
+        val btnPlus: ImageButton = v.findViewById(R.id.btnPlus)
+        val btnMinus: ImageButton = v.findViewById(R.id.btnMinus)
+        val btnRemove: ImageButton = v.findViewById(R.id.btnRemove)
     }
 }

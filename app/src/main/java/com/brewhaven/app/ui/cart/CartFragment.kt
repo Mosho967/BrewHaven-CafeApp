@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.brewhaven.app.MainActivity
 import com.brewhaven.app.R
 import com.brewhaven.app.data.CartRepository
+import com.brewhaven.app.data.OrdersRepository
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
@@ -24,17 +25,14 @@ class CartFragment : Fragment(R.layout.fragment_cart) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Cart is an app screen: nav bar must be visible
         (activity as? MainActivity)?.setBottomNavVisible(true)
 
-        // Toolbar + back behavior
         view.findViewById<MaterialToolbar>(R.id.toolbar)?.apply {
             title = "Cart"
             setNavigationOnClickListener {
                 if (parentFragmentManager.backStackEntryCount > 0) {
                     parentFragmentManager.popBackStack()
                 } else {
-                    // Drive the bottom nav directly back to Menu
                     requireActivity()
                         .findViewById<BottomNavigationView>(R.id.bottomNav)
                         .selectedItemId = R.id.nav_menu
@@ -50,9 +48,9 @@ class CartFragment : Fragment(R.layout.fragment_cart) {
         list.layoutManager = LinearLayoutManager(requireContext())
 
         adapter = CartAdapter(
-            onPlus = { item -> CartRepository.inc(item.id); render() },
-            onMinus = { item -> CartRepository.dec(item.id); render() },
-            onRemove = { item -> CartRepository.remove(item.id); render() },
+            onPlus = { line -> CartRepository.inc(line.itemId); render() },
+            onMinus = { line -> CartRepository.dec(line.itemId); render() },
+            onRemove = { line -> CartRepository.remove(line.itemId); render() },
             nameToDrawable = { name ->
                 val slug = name.lowercase()
                     .replace("&", "and")
@@ -68,10 +66,25 @@ class CartFragment : Fragment(R.layout.fragment_cart) {
             if (CartRepository.items().isEmpty()) {
                 Toast.makeText(requireContext(), "Cart is empty.", Toast.LENGTH_SHORT).show()
             } else {
-                // TODO: persist order + clear cart
-                Toast.makeText(requireContext(), "Pretend payment succeeded.", Toast.LENGTH_SHORT).show()
+                btnCheckout.isEnabled = false
+                val items = CartRepository.items()
+
+                OrdersRepository.createOrder(items, "Card") { orderId ->
+                    btnCheckout.isEnabled = true
+                    if (orderId != null) {
+                        CartRepository.clear()
+                        Toast.makeText(requireContext(), "Order placed successfully!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "Failed to place order. Try again.", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
         }
+
+
+
+        // Optional live redraw if you wired CartRepository.onChange somewhere
+        CartRepository.onChange = { render() }
 
         render()
     }
@@ -82,7 +95,7 @@ class CartFragment : Fragment(R.layout.fragment_cart) {
     }
 
     private fun render() {
-        val lines = CartRepository.items().map { it.item to it.qty }
+        val lines = CartRepository.items()              // List<CartRepository.Line>
         adapter.submit(lines)
 
         val total = CartRepository.total()

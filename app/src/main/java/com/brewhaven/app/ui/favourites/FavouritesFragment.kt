@@ -17,13 +17,16 @@ class FavouritesFragment : Fragment(R.layout.fragment_favourites) {
 
     private val db by lazy { FirebaseFirestore.getInstance() }
     private lateinit var adapter: FavouritesAdapter
+    private lateinit var list: RecyclerView
+    private lateinit var empty: TextView
+    private lateinit var progress: View
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val list = view.findViewById<RecyclerView>(R.id.favList)
-        val empty = view.findViewById<TextView>(R.id.emptyText)
-        val progress = view.findViewById<View>(R.id.progress)
+        list = view.findViewById(R.id.favList)
+        empty = view.findViewById(R.id.emptyText)
+        progress = view.findViewById(R.id.progress)
 
         list.layoutManager = GridLayoutManager(requireContext(), 2)
 
@@ -40,17 +43,32 @@ class FavouritesFragment : Fragment(R.layout.fragment_favourites) {
             },
             onToggleHeart = { itemId ->
                 FavoritesRepository.remove(itemId)
-                loadFavs(progress, empty)
+                // Repo listener calls back into render and update UI
             }
         )
-
         list.adapter = adapter
 
-        loadFavs(progress, empty)
+        // Initial paint with whatever repo has cached
+        renderFromIds(FavoritesRepository.allIds())
+
+        // Live updates
+        FavoritesRepository.onChange = { ids ->
+            renderFromIds(ids)
+        }
     }
 
-    private fun loadFavs(progress: View, empty: TextView) {
-        val ids = FavoritesRepository.allIds()
+    override fun onDestroyView() {
+        super.onDestroyView()
+        // Prevent leaking the fragment as a callback target
+        if (FavoritesRepository.onChange != null) FavoritesRepository.onChange = null
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (activity as? MainActivity)?.setBottomNavVisible(true)
+    }
+
+    private fun renderFromIds(ids: Set<String>) {
         if (ids.isEmpty()) {
             progress.visibility = View.GONE
             empty.visibility = View.VISIBLE
@@ -61,8 +79,8 @@ class FavouritesFragment : Fragment(R.layout.fragment_favourites) {
         progress.visibility = View.VISIBLE
         empty.visibility = View.GONE
 
-        val batches = ids.chunked(10)
         val results = mutableListOf<MenuItemModel>()
+        val batches = ids.toList().chunked(10)
         var done = 0
 
         batches.forEach { chunk ->
@@ -95,16 +113,6 @@ class FavouritesFragment : Fragment(R.layout.fragment_favourites) {
                         }
                     }
                 }
-
-
         }
-    }
-    override fun onResume() {
-        super.onResume()
-        (activity as? MainActivity)?.setBottomNavVisible(true)
-    }
-    override fun onStart() {
-        super.onStart()
-        (activity as? MainActivity)?.setBottomNavVisible(true)
     }
 }
