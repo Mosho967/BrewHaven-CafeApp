@@ -13,10 +13,30 @@ import com.brewhaven.app.data.CartRepository
 import com.brewhaven.app.data.FavoritesRepository
 import com.google.android.material.appbar.MaterialToolbar
 
+/**
+ * ItemDetailFragment
+ *
+ * Displays full details for a single menu item including:
+ * - Image, name, price
+ * - Description, calories, allergen information
+ * - Stock/availability
+ * - Favourite toggle state
+ * - Quantity selector and "Add to Cart" functionality
+ *
+ * The item model is passed via fragment arguments. Business actions
+ * (favouriting, adding to cart) are delegated to their respective repositories.
+ *
+ * This fragment keeps UI state synced with `FavoritesRepository.onChange`
+ * to reflect real-time favourite updates.
+ */
 class ItemDetailFragment : Fragment(R.layout.fragment_item_detail) {
 
     companion object {
         private const val ARG_ITEM = "arg_item"
+
+        /**
+         * Creates a new instance of ItemDetailFragment with the selected item bundled.
+         */
         fun newInstance(item: MenuItemModel) = ItemDetailFragment().apply {
             arguments = Bundle().apply { putParcelable(ARG_ITEM, item) }
         }
@@ -44,17 +64,21 @@ class ItemDetailFragment : Fragment(R.layout.fragment_item_detail) {
         val btnAdd = view.findViewById<Button>(R.id.btnAddToCart)
         val toolbar = view.findViewById<MaterialToolbar>(R.id.toolbar)
 
-        // Fill UI
+        // -------- Fill Static Item UI --------
+
         titleText.text = item.name
         priceText.text = "£" + String.format("%.2f", item.price)
+
         descText.text = item.description.orEmpty()
         descText.visibility = if (item.description.isNullOrBlank()) View.GONE else View.VISIBLE
 
+        // Calories
         item.calories?.let {
             kcalText.text = "${it.toInt()} kcal"
             kcalText.visibility = View.VISIBLE
         } ?: run { kcalText.visibility = View.GONE }
 
+        // Allergens list
         val chips = item.allergens?.filter { it.isNotBlank() }.orEmpty()
         if (chips.isNotEmpty()) {
             allergensText.text = "Allergens: ${chips.joinToString(", ")}"
@@ -63,8 +87,10 @@ class ItemDetailFragment : Fragment(R.layout.fragment_item_detail) {
             allergensText.visibility = View.GONE
         }
 
+        // Load drawable based on item name
         image.setImageResource(nameToDrawable(item.name) ?: R.drawable.ic_image_placeholder)
 
+        // Sold-out handling
         val available = item.available
         soldOut.visibility = if (available) View.GONE else View.VISIBLE
         btnAdd.isEnabled = available
@@ -72,15 +98,18 @@ class ItemDetailFragment : Fragment(R.layout.fragment_item_detail) {
         btnMinus.isEnabled = available
         view.alpha = if (available) 1f else 0.9f
 
-        // Qty steppers
+        // -------- Quantity Selector --------
+
         qty = 1
         qtyText.text = qty.toString()
+
         btnMinus.setOnClickListener {
             if (qty > 1) {
                 qty -= 1
                 qtyText.text = qty.toString()
             }
         }
+
         btnPlus.setOnClickListener {
             if (qty < 20) {
                 qty += 1
@@ -88,11 +117,16 @@ class ItemDetailFragment : Fragment(R.layout.fragment_item_detail) {
             }
         }
 
-        // Favorites: live sync with repo
+        // -------- Favourites Sync --------
+
         var fav = FavoritesRepository.isFav(item.id)
-        fun renderFav() { btnFav.text = if (fav) "♥ Favorited" else "♡ Favorite" }
+
+        fun renderFav() {
+            btnFav.text = if (fav) "♥ Favorited" else "♡ Favorite"
+        }
         renderFav()
 
+        // Keep UI updated when repository favourites change
         FavoritesRepository.onChange = { ids ->
             val newFav = item.id in ids
             if (newFav != fav) {
@@ -101,19 +135,30 @@ class ItemDetailFragment : Fragment(R.layout.fragment_item_detail) {
             }
         }
 
+        // Toggle favourite state
         btnFav.setOnClickListener { FavoritesRepository.toggle(item.id) }
 
-        // Add to cart
+        // -------- Add to Cart --------
+
         btnAdd.setOnClickListener {
             CartRepository.add(item, qty)
-            Toast.makeText(requireContext(), "Added $qty × ${item.name}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                requireContext(),
+                "Added $qty × ${item.name}",
+                Toast.LENGTH_SHORT
+            ).show()
         }
 
-        // Toolbar
+        // -------- Toolbar Setup --------
+
         toolbar.title = item.name
         toolbar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
     }
 
+    /**
+     * Clean up favourite-change callbacks when view is destroyed
+     * to avoid updates targeting a dead fragment.
+     */
     override fun onDestroyView() {
         super.onDestroyView()
         if (FavoritesRepository.onChange != null) FavoritesRepository.onChange = null
@@ -129,11 +174,17 @@ class ItemDetailFragment : Fragment(R.layout.fragment_item_detail) {
         (activity as? MainActivity)?.setBottomNavVisible(true)
     }
 
+    /**
+     * Attempts to map item names to drawable resources by normalising
+     * the string (lowercase, remove symbols, replace with underscores).
+     * Returns null if no drawable is found.
+     */
     private fun nameToDrawable(name: String): Int? {
         val slug = name.lowercase()
             .replace("&", "and")
             .replace("[^a-z0-9]+".toRegex(), "_")
             .trim('_')
+
         val resId = resources.getIdentifier(slug, "drawable", requireContext().packageName)
         return if (resId != 0) resId else null
     }

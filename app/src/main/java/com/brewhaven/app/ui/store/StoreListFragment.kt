@@ -10,12 +10,26 @@ import com.brewhaven.app.R
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.android.material.appbar.MaterialToolbar
 
-
+/**
+ * StoreListFragment
+ *
+ * Displays all menu items belonging to a specific category (e.g. “Teas”, “Sandwiches”).
+ * Loads items directly from Firestore and maps them into [MenuItemModel] objects.
+ *
+ * Responsibilities:
+ * - Show loading state, error state, and item list state.
+ * - Handle navigation back to the menu screen.
+ * - Navigate to [ItemDetailFragment] when an item is tapped.
+ * - Sort results so available items appear first, followed by sold-out ones.
+ */
 class StoreListFragment : Fragment(R.layout.fragment_store_list) {
 
     companion object {
         private const val ARG_CATEGORY = "arg_category"
 
+        /**
+         * Factory method for creating a category-specific item list.
+         */
         fun newInstance(category: String) = StoreListFragment().apply {
             arguments = Bundle().apply { putString(ARG_CATEGORY, category) }
         }
@@ -34,11 +48,12 @@ class StoreListFragment : Fragment(R.layout.fragment_store_list) {
         val progress = view.findViewById<View>(R.id.progress)
         val errorText = view.findViewById<TextView>(R.id.errorText)
         val toolbar = view.findViewById<MaterialToolbar>(R.id.toolbar)
-        toolbar.title = category          // e.g."Bottled Drinks"
-        toolbar.setNavigationOnClickListener {
-            parentFragmentManager.popBackStack()
-        }
 
+        // Toolbar configuration
+        toolbar.title = category
+        toolbar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
+
+        // Adapter and navigation to item detail
         adapter = StoreAdapter(
             emptyList(),
             onClick = { item ->
@@ -53,19 +68,19 @@ class StoreListFragment : Fragment(R.layout.fragment_store_list) {
             },
             showCategory = false
         )
-
         list.adapter = adapter
 
         progress.visibility = View.VISIBLE
         errorText.visibility = View.GONE
 
-        // Loads all items for category (available + sold-out)
+        // ------- Firestore: Load all items under this category -------
         db.collection("menu_items")
             .whereEqualTo("category", category)
             .get()
             .addOnSuccessListener { snap ->
                 progress.visibility = View.GONE
 
+                // Map Firestore docs → MenuItemModel
                 val mapped = snap.documents.map { d ->
                     MenuItemModel(
                         id = d.id,
@@ -78,7 +93,8 @@ class StoreListFragment : Fragment(R.layout.fragment_store_list) {
                         allergens = (d.get("allergens") as? List<*>)?.mapNotNull { it as? String }
                     )
                 }
-                // Sort: available first, then by name
+
+                // Sort: available → sold-out, then alphabetical
                 val sorted = mapped.sortedWith(
                     compareByDescending<MenuItemModel> { it.available }.thenBy { it.name }
                 )
@@ -90,17 +106,18 @@ class StoreListFragment : Fragment(R.layout.fragment_store_list) {
                     adapter.submit(sorted)
                 }
             }
-
             .addOnFailureListener { e ->
                 progress.visibility = View.GONE
                 errorText.text = "Failed to load $category: ${e.localizedMessage}"
                 errorText.visibility = View.VISIBLE
             }
-
     }
+
+    /**
+     * Ensures bottom navigation stays visible when this fragment is displayed.
+     */
     override fun onResume() {
         super.onResume()
         (activity as? MainActivity)?.setBottomNavVisible(true)
     }
-
 }

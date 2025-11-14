@@ -17,8 +17,20 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.SetOptions
 
+/**
+ * MainActivity
+ *
+ * Central activity managing:
+ * - Authentication state routing (Splash → Welcome → Tabs)
+ * - Persistent bottom navigation tabs
+ * - Fragment lifecycle and tab switching
+ * - User-bound repositories (cart, favourites, orders)
+ *
+ * The activity owns all top-level navigation flows so fragments stay simple.
+ */
 class MainActivity : AppCompatActivity() {
 
+    // Fragment tags for tab persistence
     private val TAG_MENU   = "frag_menu"
     private val TAG_FAV    = "frag_fav"
     private val TAG_CART   = "frag_cart"
@@ -26,14 +38,22 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
 
+    /**
+     * AuthStateListener
+     *
+     * Responds to login/logout events and routes the user to:
+     * - Welcome screen (signed out)
+     * - Tabbed UI (signed in)
+     *
+     * Rebinds repositories each time the authenticated user changes.
+     */
     private val authListener = FirebaseAuth.AuthStateListener { fb ->
         val user = fb.currentUser
+
         if (user == null) {
-            // signed out
-            bindUserRepositories() // clears with null
+            bindUserRepositories()    // clear repositories for null uid
             showWelcome()
         } else {
-            // signed in
             bindUserRepositories()
             showTabs()
         }
@@ -46,8 +66,12 @@ class MainActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
 
         val bottom = findViewById<BottomNavigationView>(R.id.bottomNav)
+
+        /**
+         * Handles tab switching.
+         * Clears any deep navigation stack before switching to a tab.
+         */
         bottom.setOnItemSelectedListener { item ->
-            // clear any pushed detail screens before switching tabs
             supportFragmentManager.popBackStack(
                 null,
                 androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE
@@ -61,10 +85,12 @@ class MainActivity : AppCompatActivity() {
             }
             true
         }
-        bottom.setOnItemReselectedListener { /* no-op */ }
 
+        // Ignore reselect events (avoids refreshing fragments unnecessarily)
+        bottom.setOnItemReselectedListener { }
+
+        // Initial launch: show splash animation screen
         if (savedInstanceState == null) {
-            // Shows a Splash visual.
             setBottomNavVisible(false)
             supportFragmentManager.commit {
                 replace(R.id.fragment_container, SplashFragment())
@@ -82,8 +108,13 @@ class MainActivity : AppCompatActivity() {
         auth.removeAuthStateListener(authListener)
     }
 
-    // ============== Public helpers used by frags ==============
+    // ------------------------------------------------------------
+    // Public helpers used by fragments
+    // ------------------------------------------------------------
 
+    /**
+     * Show or hide bottom navigation bar.
+     */
     fun setBottomNavVisible(visible: Boolean) {
         findViewById<BottomNavigationView>(R.id.bottomNav).visibility =
             if (visible) View.VISIBLE else View.GONE
@@ -93,10 +124,14 @@ class MainActivity : AppCompatActivity() {
         findViewById<BottomNavigationView>(R.id.bottomNav).selectedItemId = itemId
     }
 
+    /**
+     * Called after successful Login/Signup to reset the fragment stack
+     * and return to the Menu tab.
+     */
     fun startAppFromAuth() {
         val fm = supportFragmentManager
 
-        // Clear any leftover fragments from auth flow
+        // Clear any auth flow fragments (Welcome, Login, Signup, etc.)
         fm.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
 
         fm.commit {
@@ -105,26 +140,29 @@ class MainActivity : AppCompatActivity() {
                 .forEach { remove(it) }
         }
 
-        // Rebinds user-specific repositories (Cart, Favourites, etc.)
         bindUserRepositories()
 
-        // Show bottom navigation and switch to Menu tab
         setBottomNavVisible(true)
         selectTab(R.id.nav_menu)
     }
 
-    /** Called by Menu toolbar “Sign out”. Do NOT navigate here; listener will handle it. */
+    /**
+     * Triggered by the Menu toolbar sign-out action.
+     * The auth listener handles the actual navigation change.
+     */
     fun signOutToWelcome() {
         FirebaseAuth.getInstance().signOut()
-        // authListener fires -> showWelcome()
     }
 
-    /** Attach or clear repositories based on current user */
+    /**
+     * Binds repositories to current user uid or clears them if uid is null.
+     * Also ensures the user's base Firestore profile exists.
+     */
     fun bindUserRepositories() {
         val user = FirebaseAuth.getInstance().currentUser
         val uid = user?.uid
 
-        // Ensures customers/{uid} once logged in
+        // Create/merge customer profile in Firestore on login
         if (uid != null) {
             val doc = mapOf(
                 "email"     to (user.email ?: ""),
@@ -140,30 +178,42 @@ class MainActivity : AppCompatActivity() {
         com.brewhaven.app.data.OrdersRepository.bindUser(uid)
     }
 
-    // ============== Internal UI routing owned by MainActivity ==============
+    // ------------------------------------------------------------
+    // Internal navigation owned by MainActivity
+    // ------------------------------------------------------------
 
+    /**
+     * Shows the Welcome screen for signed-out users.
+     * Clears all fragments and hides bottom navigation.
+     */
     private fun showWelcome() {
         val fm = supportFragmentManager
         fm.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
+
         fm.commit {
             fm.fragments.forEach { remove(it) }
             replace(R.id.fragment_container, WelcomeFragment())
         }
+
         setBottomNavVisible(false)
     }
 
+    /**
+     * Shows the main tab UI for signed-in users.
+     * Ensures tab fragments are created once and reused thereafter.
+     */
     private fun showTabs() {
         val fm = supportFragmentManager
         fm.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
 
-        // Remove any non-tab/auth fragments (Splash, Welcome, Login, SignUp, etc.)
+        // Remove non-tab fragments (e.g. Splash, Welcome, Login, SignUp)
         fm.commit {
             fm.fragments
                 .filter { it.tag !in setOf(TAG_MENU, TAG_FAV, TAG_CART, TAG_ORDERS) }
                 .forEach { remove(it) }
         }
 
-        // Ensure Menu fragment exists
+        // Ensure Menu fragment exists; create only once
         val menu = fm.findFragmentByTag(TAG_MENU) ?: MenuFragment().also {
             fm.commit {
                 setReorderingAllowed(true)
@@ -171,7 +221,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Hides others, show menu by default
+        // Show only the Menu fragment initially, hide others
         fm.commit {
             setReorderingAllowed(true)
             listOf(TAG_MENU, TAG_FAV, TAG_CART, TAG_ORDERS)
@@ -185,20 +235,29 @@ class MainActivity : AppCompatActivity() {
         findViewById<BottomNavigationView>(R.id.bottomNav).selectedItemId = R.id.nav_menu
     }
 
+    /**
+     * Switches between persistent tab fragments.
+     * Creates them once and hides/shows as needed (no recreation).
+     */
     private inline fun switchTo(tag: String, factory: () -> Fragment) {
         val fm = supportFragmentManager
+
         val target = fm.findFragmentByTag(tag) ?: factory().also {
             fm.commit {
                 setReorderingAllowed(true)
                 add(R.id.fragment_container, it, tag)
             }
         }
+
         fm.commit {
             setReorderingAllowed(true)
             listOf(TAG_MENU, TAG_FAV, TAG_CART, TAG_ORDERS)
                 .mapNotNull { fm.findFragmentByTag(it) }
-                .forEach { frag -> if (frag == target) show(frag) else hide(frag) }
+                .forEach { frag ->
+                    if (frag == target) show(frag) else hide(frag)
+                }
         }
+
         setBottomNavVisible(true)
     }
 }

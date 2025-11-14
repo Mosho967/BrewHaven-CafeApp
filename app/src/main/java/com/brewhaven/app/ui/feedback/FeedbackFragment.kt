@@ -13,6 +13,20 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
+/**
+ * FeedbackFragment
+ *
+ * Allows authenticated users to submit feedback consisting of a rating
+ * and an optional comment. Feedback is stored inside:
+ *
+ *   /customers/{uid}/feedback/{autoId}
+ *
+ * Responsibilities:
+ * - Ensure user is logged in before submitting feedback.
+ * - Validate rating input.
+ * - Send feedback to Firestore with timestamp.
+ * - Provide basic UI feedback and navigation.
+ */
 class FeedbackFragment : Fragment(R.layout.fragment_feedback) {
 
     private val auth by lazy { FirebaseAuth.getInstance() }
@@ -35,13 +49,21 @@ class FeedbackFragment : Fragment(R.layout.fragment_feedback) {
         btnSubmit.setOnClickListener {
             val user = auth.currentUser
             if (user == null) {
-                Toast.makeText(requireContext(), "Please sign in to send feedback.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Please sign in to send feedback.",
+                    Toast.LENGTH_SHORT
+                ).show()
                 return@setOnClickListener
             }
 
             val rating = ratingBar.rating.toInt()
             if (rating == 0) {
-                Toast.makeText(requireContext(), "Please choose a rating.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Please choose a rating.",
+                    Toast.LENGTH_SHORT
+                ).show()
                 return@setOnClickListener
             }
 
@@ -49,6 +71,7 @@ class FeedbackFragment : Fragment(R.layout.fragment_feedback) {
 
             btnSubmit.isEnabled = false
 
+            // Payload stored under the user's profile
             val payload = hashMapOf(
                 "rating" to rating,
                 "comment" to comment,
@@ -60,7 +83,11 @@ class FeedbackFragment : Fragment(R.layout.fragment_feedback) {
                 .collection("feedback")
                 .add(payload)
                 .addOnSuccessListener {
-                    Toast.makeText(requireContext(), "Thanks for your feedback!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        "Thanks for your feedback!",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     parentFragmentManager.popBackStack()
                 }
                 .addOnFailureListener { e ->
@@ -76,6 +103,9 @@ class FeedbackFragment : Fragment(R.layout.fragment_feedback) {
         }
     }
 
+    /**
+     * Keeps bottom navigation visible while on the feedback screen.
+     */
     override fun onResume() {
         super.onResume()
         (activity as? MainActivity)?.setBottomNavVisible(true)

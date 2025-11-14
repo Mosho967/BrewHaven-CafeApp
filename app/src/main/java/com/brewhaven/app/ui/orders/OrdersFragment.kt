@@ -12,6 +12,22 @@ import com.brewhaven.app.data.OrdersRepository
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
+/**
+ * OrdersFragment
+ *
+ * Displays the list of orders placed by the current user.
+ * The fragment observes [OrdersRepository.onChange] to stay updated
+ * with any new orders or changes, and renders loading / empty / list states.
+ *
+ * Responsibilities:
+ * - Show a list of past orders in a RecyclerView.
+ * - Handle back navigation consistently.
+ * - Render cached orders instantly if available.
+ * - Listen for repository-driven updates and refresh UI accordingly.
+ *
+ * All order retrieval and logic come from [OrdersRepository];
+ * this fragment is strictly responsible for UI.
+ */
 class OrdersFragment : Fragment(R.layout.fragment_orders) {
 
     private lateinit var adapter: OrdersAdapter
@@ -23,6 +39,7 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
         super.onViewCreated(view, savedInstanceState)
         (activity as? MainActivity)?.setBottomNavVisible(true)
 
+        // Configure toolbar with proper back behaviour
         view.findViewById<MaterialToolbar>(R.id.toolbar)?.apply {
             title = "Orders"
             setNavigationIcon(R.drawable.ic_arrow_back_24)
@@ -42,13 +59,20 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
         progress = view.findViewById(R.id.progress)
 
         list.layoutManager = LinearLayoutManager(requireContext())
+
+        // Adapter for order summaries
         adapter = OrdersAdapter { order ->
-            // later: navigate to OrderDetailFragment.newInstance(order.id)
+            // Placeholder: navigate to order details in future
+            // OrderDetailFragment.newInstance(order.id)
         }
         list.adapter = adapter
 
         showLoading(true)
 
+        /**
+         * Listen to live updates from OrdersRepository.
+         * When new orders are available, update the UI accordingly.
+         */
         OrdersRepository.onChange = onChange@ { orders ->
             if (!isAdded) return@onChange
 
@@ -64,7 +88,10 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
             }
         }
 
-
+        /**
+         * If the repository already has cached orders, show them immediately
+         * to avoid a blank screen while the listener fires.
+         */
         val cached = OrdersRepository.current()
         if (cached.isNotEmpty()) {
             showLoading(false)
@@ -74,11 +101,17 @@ class OrdersFragment : Fragment(R.layout.fragment_orders) {
         }
     }
 
+    /**
+     * Clears repository callback to prevent leaks or invalid updates.
+     */
     override fun onDestroyView() {
         super.onDestroyView()
         OrdersRepository.onChange = null
     }
 
+    /**
+     * Toggles progress indicator visibility.
+     */
     private fun showLoading(show: Boolean) {
         progress.visibility = if (show) View.VISIBLE else View.GONE
     }

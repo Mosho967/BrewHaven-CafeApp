@@ -12,6 +12,20 @@ import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.FirebaseFirestore
 import com.brewhaven.app.ui.feedback.FeedbackFragment
 
+/**
+ * MenuFragment
+ *
+ * Displays the high-level menu structure grouped into sections (Headers + Categories).
+ * Each category leads to a StoreListFragment that shows the actual menu items.
+ *
+ * Responsibilities:
+ * - Configure toolbar and overflow menu options (Sign Out, Feedback)
+ * - Display menu categories with preview images
+ * - Request Firestore category counts (using aggregation) and update rows dynamically
+ * - Handle navigation to Feedback and StoreListFragment
+ *
+ * Business logic is kept out of this fragment; it only handles UI and navigation.
+ */
 class MenuFragment : Fragment(R.layout.fragment_menu) {
 
     private val db by lazy { FirebaseFirestore.getInstance() }
@@ -21,18 +35,23 @@ class MenuFragment : Fragment(R.layout.fragment_menu) {
         super.onViewCreated(view, savedInstanceState)
         (activity as? MainActivity)?.setBottomNavVisible(true)
 
-        // Toolbar + overflow
+        // ----- Toolbar + Overflow Menu -----
+
         val toolbar = view.findViewById<MaterialToolbar>(R.id.toolbar)
         toolbar.title = "Menu"
+
         toolbar.menu.clear()
         toolbar.inflateMenu(R.menu.menu_overflow)
+
         toolbar.setOnMenuItemClickListener { mi ->
             when (mi.itemId) {
                 R.id.action_sign_out -> {
                     (requireActivity() as MainActivity).signOutToWelcome()
                     true
                 }
+
                 R.id.action_feedback -> {
+                    // Navigate to FeedbackFragment
                     parentFragmentManager.beginTransaction()
                         .setReorderingAllowed(true)
                         .replace(R.id.fragment_container, FeedbackFragment())
@@ -40,24 +59,30 @@ class MenuFragment : Fragment(R.layout.fragment_menu) {
                         .commit()
                     true
                 }
+
                 else -> false
             }
         }
 
+        // ----- RecyclerView Setup -----
+
         val rv = view.findViewById<RecyclerView>(R.id.menuRecycler)
         rv.layoutManager = LinearLayoutManager(requireContext())
 
+        // Base rows for sections and categories (counts start as 0)
         val rows = mutableListOf<MenuRow>().apply {
             add(MenuRow.Header("Drinks"))
             add(MenuRow.Category("Bottled Drinks", R.drawable.still_water_500ml, 0))
             add(MenuRow.Category("Espresso Drinks", R.drawable.espresso, 0))
             add(MenuRow.Category("Teas", R.drawable.green_tea, 0))
+
             add(MenuRow.Header("Food"))
             add(MenuRow.Category("Breakfast", R.drawable.bacon_roll, 0))
             add(MenuRow.Category("Sandwiches", R.drawable.blt_sandwich, 0))
             add(MenuRow.Category("Snacks", R.drawable.chocolate_chip_cookie, 0))
         }
 
+        // Adapter with navigation callback
         adapter = MenuSectionAdapter(rows) { categoryTitle ->
             parentFragmentManager.beginTransaction()
                 .setReorderingAllowed(true)
@@ -67,6 +92,9 @@ class MenuFragment : Fragment(R.layout.fragment_menu) {
         }
         rv.adapter = adapter
 
+        // ----- Firestore Category Counts -----
+        // Fetch counts asynchronously for each category row.
+        // This uses Firestore's aggregation API for efficiency.
         rows.forEachIndexed { index, row ->
             if (row is MenuRow.Category) {
                 db.collection("menu_items")
@@ -81,6 +109,15 @@ class MenuFragment : Fragment(R.layout.fragment_menu) {
     }
 }
 
+/**
+ * MenuRow
+ *
+ * Represents a row in the menu:
+ * - Header: Section titles such as "Drinks", "Food"
+ * - Category: A clickable category entry with image and item count
+ *
+ * Used by MenuSectionAdapter to render the menu layout.
+ */
 sealed class MenuRow {
     data class Header(val title: String) : MenuRow()
     data class Category(val title: String, val imageRes: Int, val count: Int) : MenuRow()

@@ -14,21 +14,36 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 
+/**
+ * SignUpFragment
+ *
+ * Handles creation of new user accounts using Firebase Authentication.
+ * Performs full client-side validation (names, email, password strength,
+ * and password confirmation) before attempting signup. After successful
+ * account creation, the fragment stores basic user profile data in Firestore
+ * under /customers/{uid}. Navigation after signup is delegated to
+ * MainActivity’s AuthStateListener to avoid conflicting transitions.
+ */
 class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
 
+    // Firebase authentication instance for account creation
     private val auth by lazy { FirebaseAuth.getInstance() }
+
+    // Firestore instance used to store user profile details
     private val db by lazy { FirebaseFirestore.getInstance() }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (activity as? MainActivity)?.setBottomNavVisible(false)
 
+        // TextInputLayouts for form error display
         val layFirst = view.findViewById<TextInputLayout>(R.id.layFirst)
         val layLast  = view.findViewById<TextInputLayout>(R.id.layLast)
         val layEmail = view.findViewById<TextInputLayout>(R.id.layEmail)
         val layPass  = view.findViewById<TextInputLayout>(R.id.layPass)
         val layPass2 = view.findViewById<TextInputLayout>(R.id.layPass2)
 
+        // EditTexts for user input
         val first  = view.findViewById<TextInputEditText>(R.id.editFirst)
         val last   = view.findViewById<TextInputEditText>(R.id.editLast)
         val email  = view.findViewById<TextInputEditText>(R.id.editEmail)
@@ -37,8 +52,14 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
         val btn    = view.findViewById<Button>(R.id.btnCreate)
         val bar    = view.findViewById<MaterialToolbar>(R.id.toolbar)
 
+        // Return to previous screen
         bar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
 
+        /**
+         * Validates password strength according to basic security rules.
+         * Requirements: at least 8 chars, one upper, one lower, one digit,
+         * and one non-alphanumeric symbol.
+         */
         fun isStrongPassword(p: String): Boolean {
             if (p.length < 8) return false
             val hasUpper = p.any { it.isUpperCase() }
@@ -49,7 +70,7 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
         }
 
         btn.setOnClickListener {
-            // clear old errors
+            // Clear previous validation errors
             layFirst.error = null
             layLast.error  = null
             layEmail.error = null
@@ -64,6 +85,7 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
 
             var ok = true
 
+            // Required field validation
             if (f.isEmpty()) {
                 layFirst.error = "First name is required"
                 ok = false
@@ -77,6 +99,7 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
                 ok = false
             }
 
+            // Password strength validation
             if (p1.isEmpty()) {
                 layPass.error = "Password is required"
                 ok = false
@@ -85,6 +108,7 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
                 ok = false
             }
 
+            // Confirm password validation
             if (p2.isEmpty()) {
                 layPass2.error = "Please confirm your password"
                 ok = false
@@ -104,12 +128,14 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
                 return@setOnClickListener
             }
 
-            btn.isEnabled = false
+            btn.isEnabled = false  // Prevent multiple taps
 
+            // Create Firebase account
             auth.createUserWithEmailAndPassword(e, p1)
                 .addOnSuccessListener { task ->
                     val uid = task.user?.uid ?: return@addOnSuccessListener
 
+                    // Basic profile stored in Firestore for later use
                     val userDoc = mapOf(
                         "firstName" to f,
                         "lastName"  to l,
@@ -127,7 +153,7 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
                                 "Account created.",
                                 Toast.LENGTH_SHORT
                             ).show()
-                            // MainActivity AuthStateListener flips to tabs
+                            // MainActivity's AuthStateListener handles navigation after signup
                         }
                         .addOnFailureListener { err ->
                             if (isAdded) {
@@ -155,6 +181,10 @@ class SignUpFragment : Fragment(R.layout.fragment_sign_up) {
         }
     }
 
+    /**
+     * Ensures bottom navigation remains hidden while the user is on the
+     * signup screen or returns to it.
+     */
     override fun onResume() {
         super.onResume()
         (activity as? MainActivity)?.setBottomNavVisible(false)
