@@ -109,6 +109,6 @@ BrewHaven provides a complete customer-side café experience:
 - Feedback
 - Persistent data through Firebase
 
-It offers a smooth, organised UI and clear navigation through all customer features.git add README.md
-git commit -m "docs: add project overview README for coursework"
-git push origin main
+It offers a smooth, organised UI and clear navigation through all customer features.
+
+
